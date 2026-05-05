@@ -1,9 +1,7 @@
 import axios from 'axios';
-
 import { useAuthStore } from "../../features/auth/store/authStore.js";
 
-//instancia
-
+// Instancia Auth
 const axiosAuth = axios.create({
   baseURL: import.meta.env.VITE_AUTH_URL || "http://localhost:5070/api/v1/auth/",
   timeout: 8000,
@@ -12,14 +10,16 @@ const axiosAuth = axios.create({
   }
 });
 
+// Instancia Admin (Apunta al puerto de tu Gateway o servidor centralizado)
 const axiosAdmin = axios.create({
-  baseURL: import.meta.env.VITE_ADMIN_URL,
+  baseURL: import.meta.env.VITE_ADMIN_URL || "http://localhost:3001/kafetery/v1",
   timeout: 8000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+// ================= INTERCEPTORS =================
 
 axiosAuth.interceptors.request.use((config) => {
   config._axiosClient = "auth";
@@ -39,7 +39,7 @@ axiosAdmin.interceptors.request.use((config) => {
   return config;
 });
 
-// configuración de documentación axios
+// ================= TOKEN REFRESH LOGIC =================
 let _isRefreshing = false;
 let failedQueue = [];
 
@@ -53,7 +53,6 @@ function _processQueue(_error, token = null) {
 const handleRefreshToken = async function (_error) {
   const _original = _error.config;
   if (!_original || _original._retry) {
-    // Ya se reintentó o no hay config
     return Promise.reject(_error);
   }
   const status = _error.response?.status;
@@ -62,10 +61,8 @@ const handleRefreshToken = async function (_error) {
   const isRefreshEndpoint = requestUrl.includes("/auth/refresh");
   const shouldAttemptRefresh =
     !isRefreshEndpoint &&
-    // La mayoría de casos es 401 (TokenExpiredError)
     status === 401;
 
-  // Algunos servicios pueden responder 403 con `error: TOKEN_EXPIRED`
   const shouldAttemptRefreshFrom403 =
     !isRefreshEndpoint && status === 403 && errorCode === "TOKEN_EXPIRED";
 
@@ -75,7 +72,6 @@ const handleRefreshToken = async function (_error) {
     const retryClient =
       _original._axiosClient === "admin" ? axiosAdmin : axiosAuth;
     if (_isRefreshing) {
-      // Si ya hay un refresh en curso, encola la petición
       return new Promise(function (resolve, reject) {
         failedQueue.push({ resolve, reject });
       })
@@ -100,6 +96,7 @@ const handleRefreshToken = async function (_error) {
         expiresIn,
         userDetails,
       } = response.data;
+      
       useAuthStore.setState({
         token: accessToken,
         refreshToken: newRefreshToken,
@@ -122,9 +119,6 @@ const handleRefreshToken = async function (_error) {
 };
 
 axiosAuth.interceptors.response.use((res) => res, handleRefreshToken);
-
 axiosAdmin.interceptors.response.use((res) => res, handleRefreshToken);
 
-// ================= EXPORT AXIOS =================
-export { axiosAuth, axiosAdmin };
-export { handleRefreshToken };
+export { axiosAuth, axiosAdmin, handleRefreshToken };
