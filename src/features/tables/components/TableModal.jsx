@@ -1,23 +1,61 @@
 import { useState, useEffect } from "react";
+import { useTableStore } from "../store/tableStore";
+import { showError, showSuccess } from "../../../shared/utils/toast.js";
 
 export const TableModal = ({ isOpen, onClose, table }) => {
+    const { createTable, updateTable } = useTableStore();
+
+    const [loading, setLoading] = useState(false);
+
     const [formData, setFormData] = useState({
         tableNumber: "",
         capacity: "",
-        restaurant: ""
+        restaurant: "69a7073eb039051343b9d993"
     });
 
     useEffect(() => {
-        if (table) {
-            setFormData({
-                tableNumber: table.tableNumber || "",
-                capacity: table.capacity || "",
-                restaurant: table.restaurant || ""
-            });
-        } else {
-            setFormData({ tableNumber: "", capacity: "", restaurant: "" });
+        if (isOpen) {
+            if (table) {
+                setFormData({
+                    tableNumber: table.tableNumber || "",
+                    capacity: table.capacity || "",
+                    restaurant: table.restaurant || "69a7073eb039051343b9d993"
+                });
+            } else {
+                setFormData({ 
+                    tableNumber: "", 
+                    capacity: "", 
+                    restaurant: "69a7073eb039051343b9d993" 
+                });
+            }
         }
     }, [table, isOpen]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const payload = {
+                tableNumber: Number(formData.tableNumber),
+                capacity: Number(formData.capacity),
+                restaurant: formData.restaurant
+            };
+
+            if (table) {
+                await updateTable(table._id || table.id, payload);
+                showSuccess("Mesa actualizada exitosamente");
+            } else {
+                await createTable(payload);
+                showSuccess("Mesa habilitada exitosamente");
+            }
+            onClose();
+        } catch (error) {
+            showError(table ? "Error al actualizar la mesa" : "Error al habilitar la mesa");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -35,12 +73,13 @@ export const TableModal = ({ isOpen, onClose, table }) => {
                     </div>
                 </div>
 
-                <div className="p-8 space-y-5">
+                <form onSubmit={handleSubmit} className="p-8 space-y-5">
                     {/* Número de Mesa */}
                     <div>
                         <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Número Identificador</label>
                         <input
                             type="number"
+                            required
                             value={formData.tableNumber}
                             onChange={(e) => setFormData({ ...formData, tableNumber: e.target.value })}
                             placeholder="Ej. 5"
@@ -53,6 +92,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
                         <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Capacidad (Asientos)</label>
                         <input
                             type="number"
+                            required
                             value={formData.capacity}
                             onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
                             placeholder="Ej. 4"
@@ -65,6 +105,7 @@ export const TableModal = ({ isOpen, onClose, table }) => {
                         <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">ID de Restaurante</label>
                         <input
                             type="text"
+                            required
                             value={formData.restaurant}
                             onChange={(e) => setFormData({ ...formData, restaurant: e.target.value })}
                             placeholder="ID de referencia"
@@ -74,14 +115,22 @@ export const TableModal = ({ isOpen, onClose, table }) => {
 
                     {/* Footer de Acciones */}
                     <div className="flex flex-col gap-3 pt-6 border-t border-[#EADDCA]/30">
-                        <button className="w-full py-3.5 rounded-xl bg-[#4A3728] text-white hover:bg-[#6F4E37] transition font-bold shadow-lg text-sm uppercase tracking-widest">
-                            {table ? "Guardar Cambios" : "Habilitar Mesa"}
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className="w-full py-3.5 rounded-xl bg-[#4A3728] text-white hover:bg-[#6F4E37] transition font-bold shadow-lg text-sm uppercase tracking-widest flex items-center justify-center min-h-[50px]"
+                        >
+                            {loading ? "Cargando..." : (table ? "Guardar Cambios" : "Habilitar Mesa")}
                         </button>
-                        <button onClick={onClose} className="w-full py-2 text-[#D2B48C] hover:text-[#8B4513] transition text-[10px] font-black uppercase tracking-[0.2em]">
+                        <button 
+                            type="button"
+                            onClick={onClose} 
+                            className="w-full py-2 text-[#D2B48C] hover:text-[#8B4513] transition text-[10px] font-black uppercase tracking-[0.2em]"
+                        >
                             Cancelar
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     );

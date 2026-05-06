@@ -1,9 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useEffect as useToastEffect } from "react";
+
+import { useRestaurantStore } from "../store/restaurantStore.js"; 
+import { useUIStore } from "../../auth/store/uiStore";
+
+import { showError, showSuccess } from "../../../shared/utils/toast";
+import { showConfirmToast } from "../../auth/components/ConfirmModal";
 import { RestaurantModal } from "./RestaurantModal.jsx";
 
-export const Restaurants = ({ restaurants = [] }) => {
+export const Restaurants = () => {
+    const { 
+        restaurants = [], 
+        loading, 
+        error, 
+        getRestaurants, 
+        deactivateRestaurant 
+    } = useRestaurantStore();
+    
+    const { openConfirm } = useUIStore();
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+
+    useEffect(() => {
+        getRestaurants();
+    }, [getRestaurants]);
+
+    useToastEffect(() => {
+        if (error) showError(error);
+    }, [error]);
 
     const handleCreate = () => {
         setSelectedRestaurant(null);
@@ -13,6 +38,22 @@ export const Restaurants = ({ restaurants = [] }) => {
     const handleManage = (restaurant) => {
         setSelectedRestaurant(restaurant);
         setIsModalOpen(true);
+    };
+
+    const handleDelete = (restaurantId, restaurantName) => {
+        showConfirmToast({
+            title: "¿Desactivar restaurante?",
+            message: `¿Estás seguro de que deseas eliminar al restaurante "${restaurantName}"?`,
+            onConfirm: async () => {
+                try {
+                    await deactivateRestaurant(restaurantId);
+                    showSuccess("Restaurante desactivado exitosamente");
+                    await getRestaurants();
+                } catch (err) {
+                    showError("Error al desactivar el restaurante");
+                }
+            }
+        });
     };
 
     return (
@@ -40,16 +81,22 @@ export const Restaurants = ({ restaurants = [] }) => {
                     <table className="w-full text-left">
                         <thead className="bg-[#FDF8F3] border-b border-[#EADDCA]/50">
                             <tr>
+                                <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">ID</th>
                                 <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">Restaurante</th>
                                 <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em] hidden md:table-cell">Contacto</th>
                                 <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em] hidden sm:table-cell">ID Propietario</th>
-                                <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em] text-right">Acciones</th>
+                                <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#EADDCA]/30">
                             {restaurants.length > 0 ? (
                                 restaurants.map((res, index) => (
-                                    <tr key={index} className="hover:bg-[#FDF8F3]/50 transition-colors group">
+                                    <tr key={res._id || res.id || index} className="hover:bg-[#FDF8F3]/50 transition-colors group">
+                                        <td className="px-8 py-5">
+                                            <code className="text-[10px] bg-[#FDF8F3] px-2 py-1 rounded border border-[#EADDCA] text-[#8B4513]">
+                                                {res._id || res.id}
+                                            </code>
+                                        </td>
                                         <td className="px-8 py-5">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-[#4A3728]">{res.name}</span>
@@ -64,15 +111,23 @@ export const Restaurants = ({ restaurants = [] }) => {
                                         </td>
                                         <td className="px-8 py-5 hidden sm:table-cell">
                                             <code className="text-[10px] bg-[#FDF8F3] px-2 py-1 rounded border border-[#EADDCA] text-[#8B4513]">
-                                                {res.owner}
+                                                {res.owner?._id || res.owner}
                                             </code>
                                         </td>
-                                        <td className="px-8 py-5 text-right">
+                                        <td className="px-8 py-5 flex items-center gap-2">
                                             <button
                                                 onClick={() => handleManage(res)}
-                                                className="text-[#8B4513] font-bold text-xs hover:text-[#4A3728] transition uppercase tracking-widest"
+                                                className="bg-[#EADDCA] text-[#4A3728] px-2 py-1 rounded-md text-xs font-extrabold hover:bg-[#D2B48C] transition-all"
+                                                title="Gestionar restaurante"
                                             >
                                                 Gestionar
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(res._id || res.id, res.name)}
+                                                className="bg-red-100 text-red-700 px-2 py-1 rounded-md text-xs font-extrabold hover:bg-red-200 transition-all"
+                                                title="Eliminar restaurante"
+                                            >
+                                                Eliminar
                                             </button>
                                         </td>
                                     </tr>
@@ -80,7 +135,7 @@ export const Restaurants = ({ restaurants = [] }) => {
                             ) : (
                                 <tr>
                                     <td colSpan="4" className="px-8 py-20 text-center text-[#D2B48C] italic font-medium">
-                                        No se encontraron restaurantes en la base de datos.
+                                        {loading ? "Cargando restaurantes..." : "No se encontraron restaurantes en el sistema."}
                                     </td>
                                 </tr>
                             )}

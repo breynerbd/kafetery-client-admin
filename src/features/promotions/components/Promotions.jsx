@@ -1,9 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePromotionsStore } from "../store/promotionStore.js";
+import { showError, showSuccess } from "../../../shared/utils/toast.js";
+import { showConfirmToast } from "../../auth/components/ConfirmModal.jsx";
 import { PromotionModal } from "./PromotionModal.jsx";
 
-export const Promotions = ({ promotions = [] }) => {
+export const Promotions = () => {
+    const { 
+        promotions = [], 
+        loading, 
+        error, 
+        getPromotions, 
+        deactivatePromotion 
+    } = usePromotionsStore();
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPromo, setSelectedPromo] = useState(null);
+
+    useEffect(() => {
+        getPromotions();
+    }, [getPromotions]);
 
     const handleCreate = () => {
         setSelectedPromo(null);
@@ -13,6 +28,22 @@ export const Promotions = ({ promotions = [] }) => {
     const handleManage = (promo) => {
         setSelectedPromo(promo);
         setIsModalOpen(true);
+    };
+
+    const handleDelete = (promoId, promoTitle) => {
+        showConfirmToast({
+            title: "¿Desactivar promoción?",
+            message: `¿Estás seguro de que deseas desactivar la promoción "${promoTitle}"?`,
+            onConfirm: async () => {
+                try {
+                    await deactivatePromotion(promoId);
+                    showSuccess("Promoción desactivada exitosamente");
+                    await getPromotions();
+                } catch (err) {
+                    showError("Error al desactivar la promoción");
+                }
+            }
+        });
     };
 
     return (
@@ -40,6 +71,7 @@ export const Promotions = ({ promotions = [] }) => {
                     <table className="w-full text-left">
                         <thead className="bg-[#FDF8F3] border-b border-[#EADDCA]/50">
                             <tr>
+                                <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">ID</th>
                                 <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">Promoción</th>
                                 <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">Código</th>
                                 <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">Descuento</th>
@@ -49,7 +81,10 @@ export const Promotions = ({ promotions = [] }) => {
                         <tbody className="divide-y divide-[#EADDCA]/30">
                             {promotions.length > 0 ? (
                                 promotions.map((promo, index) => (
-                                    <tr key={index} className="hover:bg-[#FDF8F3]/50 transition-colors group">
+                                    <tr key={promo._id || promo.id || index} className="hover:bg-[#FDF8F3]/50 transition-colors group">
+                                        <td className="px-8 py-5 text-xs font-mono text-[#4A3728]">
+                                            {promo._id || promo.id || index}
+                                        </td>
                                         <td className="px-8 py-5">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-[#4A3728]">{promo.title}</span>
@@ -64,19 +99,25 @@ export const Promotions = ({ promotions = [] }) => {
                                         <td className="px-8 py-5 text-sm font-black text-[#8B4513]">
                                             {promo.discount}% OFF
                                         </td>
-                                        <td className="px-8 py-5 text-right">
+                                        <td className="px-8 py-5 text-right flex items-center justify-end gap-3">
                                             <button
                                                 onClick={() => handleManage(promo)}
                                                 className="text-[#8B4513] font-bold text-xs hover:text-[#4A3728] transition uppercase tracking-widest"
                                             >
                                                 Editar
                                             </button>
+                                            <button
+                                                onClick={() => handleDelete(promo._id || promo.id, promo.title)}
+                                                className="text-red-600 font-bold text-xs hover:text-red-800 transition uppercase tracking-widest"
+                                            >
+                                                Eliminar
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4" className="px-8 py-20 text-center text-[#D2B48C] italic font-medium">
+                                    <td colSpan="5" className="px-8 py-20 text-center text-[#D2B48C] italic font-medium">
                                         No hay promociones vigentes.
                                     </td>
                                 </tr>

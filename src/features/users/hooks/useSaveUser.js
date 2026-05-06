@@ -1,7 +1,6 @@
-import { useUsersStore } from "../../users/store/userStore.js"; // Asegúrate de ajustar la ruta
+import { useUsersStore } from "../../users/store/userStore.js";
 
 export const useSaveUser = () => {
-    // Recuperación de funciones para el hook desde el store
     const createUser = useUsersStore((state) => state.createUser);
     const updateUser = useUsersStore((state) => state.updateUser);
 
@@ -13,7 +12,6 @@ export const useSaveUser = () => {
         formData.append("email", data.email);
         formData.append("role", data.role);
 
-        // Solo añadimos la contraseña si el usuario escribió algo
         if (data.password && data.password.trim() !== "") {
             formData.append("password", data.password);
         }

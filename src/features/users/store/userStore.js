@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { axiosAdmin } from "../../../shared/api/api.js"; // Ajusta la ruta a tu archivo de instancias de Axios
+import { axiosAdmin } from "../../../shared/api/Api.js"; 
 
 export const useUsersStore = create((set, get) => ({
   users: [],
@@ -10,7 +10,6 @@ export const useUsersStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      // Se utiliza la instancia axiosAdmin configurada en el puerto centralizado
       const response = await axiosAdmin.get("/users");
 
       set({
@@ -42,26 +41,6 @@ export const useUsersStore = create((set, get) => ({
       });
     }
   },
-  
-  deleteUser: async (id) => {
-    try {
-      set({ loading: true, error: null });
-      
-      // Llamamos a la API
-      await axiosAdmin.delete(`/users/${id}`);
-
-      // Actualizamos el estado para eliminar el usuario de la lista local
-      set((state) => ({
-        users: state.users.filter((user) => user._id !== id),
-        loading: false,
-      }));
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || "Error al eliminar el usuario",
-        loading: false,
-      });
-    }
-  },
 
   updateUser: async (id, userData) => {
     try {
@@ -77,6 +56,44 @@ export const useUsersStore = create((set, get) => ({
     } catch (error) {
       set({
         error: error.response?.data?.message || "Error al actualizar el usuario",
+        loading: false,
+      });
+    }
+  },
+
+  activateUser: async (id) => {
+    try {
+      set({ loading: true, error: null });
+      const response = await axiosAdmin.put(`/users/${id}/activate`);
+      
+      set((state) => ({
+        users: state.users.map((user) => 
+          user._id === id ? (response.data.data || response.data) : user
+        ),
+        loading: false,
+      }));
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Error al activar el usuario",
+        loading: false,
+      });
+    }
+  },
+
+  deactivateUser: async (id) => {
+    try {
+      set({ loading: true, error: null });
+      const response = await axiosAdmin.put(`/users/${id}/deactivate`);
+      
+      set((state) => ({
+        users: state.users.map((user) => 
+          user._id === id ? (response.data.data || response.data) : user
+        ),
+        loading: false,
+      }));
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Error al desactivar el usuario",
         loading: false,
       });
     }

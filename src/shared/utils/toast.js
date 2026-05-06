@@ -13,13 +13,14 @@ export const showSuccess = (message) =>
   toast.success(message, {
     style: {
       ...baseStyle,
-      background: "linear-gradient(90deg, #22c55e 0%, #16a34a 100%)",
-      color: "#fff",
-      border: "2px solid #22c55e",
+      background: "linear-gradient(90deg, #9fffff 0%, #76eaea 100%)",
+      color: "#065f46", 
+      border: "2px solid #76eaea",
+      fontWeight: "600",
     },
     iconTheme: {
-      primary: "#22c55e",
-      secondary: "#fff",
+      primary: "#0d9488", 
+      secondary: "#9fffff",
     },
   });
  
@@ -27,12 +28,12 @@ export const showError = (message) =>
   toast.error(message, {
     style: {
       ...baseStyle,
-      background: "linear-gradient(90deg, #ef4444 0%, #b91c1c 100%)",
+      background: "linear-gradient(90deg, #aa7650ff 0%, #af6f40ff 100%)",
       color: "#fff",
-      border: "2px solid #ef4444",
+      border: "2px solid #EADDCA",
     },
     iconTheme: {
-      primary: "#ef4444",
+      primary: "#8B4513",
       secondary: "#fff",
     },
   });

@@ -1,9 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useEffect as useToastEffect } from "react";
+
+import { useTableStore } from "../store/tableStore";
+import { useUIStore } from "../../auth/store/uiStore";
+
+import { showError, showSuccess } from "../../../shared/utils/toast";
+import { showConfirmToast } from "../../auth/components/ConfirmModal";
 import { TableModal } from "./TableModal.jsx";
 
-export const Tables = ({ tables = [] }) => {
+export const Tables = () => {
+    const { 
+        tables = [], 
+        loading, 
+        error, 
+        getTables, 
+        deleteTable 
+    } = useTableStore();
+
+    const { openConfirm } = useUIStore();
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTable, setSelectedTable] = useState(null);
+
+    const restaurantId = "69a7073eb039051343b9d993";
+
+    useEffect(() => {
+        getTables(restaurantId);
+    }, [getTables]);
+
+    useEffect(() => {
+        if (error) showError(error);
+    }, [error]);
 
     const handleCreate = () => {
         setSelectedTable(null);
@@ -13,6 +40,21 @@ export const Tables = ({ tables = [] }) => {
     const handleManage = (table) => {
         setSelectedTable(table);
         setIsModalOpen(true);
+    };
+
+    const handleDelete = (tableId, tableNumber) => {
+        showConfirmToast({
+            title: "¿Eliminar mesa?",
+            message: `¿Estás seguro de que deseas eliminar la mesa número "${tableNumber}"?`,
+            onConfirm: async () => {
+                try {
+                    await deleteTable(tableId);
+                    showSuccess("Mesa eliminada exitosamente");
+                } catch (err) {
+                    showError("Error al eliminar la mesa");
+                }
+            }
+        });
     };
 
     return (
@@ -40,6 +82,7 @@ export const Tables = ({ tables = [] }) => {
                     <table className="w-full text-left">
                         <thead className="bg-[#FDF8F3] border-b border-[#EADDCA]/50">
                             <tr>
+                                <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">ID</th>
                                 <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">No. Mesa</th>
                                 <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em]">Capacidad</th>
                                 <th className="px-8 py-5 text-xs font-black uppercase text-[#D2B48C] tracking-[0.15em] hidden md:table-cell">Restaurante ID</th>
@@ -49,7 +92,10 @@ export const Tables = ({ tables = [] }) => {
                         <tbody className="divide-y divide-[#EADDCA]/30">
                             {tables.length > 0 ? (
                                 tables.map((table, index) => (
-                                    <tr key={index} className="hover:bg-[#FDF8F3]/50 transition-colors group">
+                                    <tr key={table._id || table.id || index} className="hover:bg-[#FDF8F3]/50 transition-colors group">
+                                        <td className="px-8 py-5 text-xs font-mono text-[#4A3728]">
+                                            {table._id || table.id}
+                                        </td>
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-lg bg-[#4A3728] flex items-center justify-center text-white font-black text-xs">
@@ -66,20 +112,26 @@ export const Tables = ({ tables = [] }) => {
                                                 {table.restaurant}
                                             </code>
                                         </td>
-                                        <td className="px-8 py-5 text-right">
+                                        <td className="px-8 py-5 text-right flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => handleManage(table)}
-                                                className="text-[#8B4513] font-bold text-xs hover:text-[#4A3728] transition uppercase tracking-widest"
+                                                className="bg-[#EADDCA] text-[#4A3728] px-2 py-1 rounded-md text-xs font-extrabold hover:bg-[#D2B48C] transition-all uppercase tracking-wider"
                                             >
-                                                Ajustar
+                                                Editar
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(table._id || table.id, table.tableNumber)}
+                                                className="bg-red-100 text-red-700 px-2 py-1 rounded-md text-xs font-extrabold hover:bg-red-200 transition-all uppercase tracking-wider"
+                                            >
+                                                Eliminar
                                             </button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4" className="px-8 py-20 text-center text-[#D2B48C] italic font-medium">
-                                        No hay mesas configuradas aún.
+                                    <td colSpan="5" className="px-8 py-20 text-center text-[#D2B48C] italic font-medium">
+                                        {loading ? "Cargando mesas..." : "No hay mesas configuradas aún."}
                                     </td>
                                 </tr>
                             )}

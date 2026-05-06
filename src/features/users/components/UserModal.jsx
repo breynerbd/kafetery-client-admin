@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useSaveUser } from "../hooks/useSaveUser.js"; // Ajusta la ruta a tu hook
+import { useUsersStore } from "../../users/store/userStore"; // Asegúrate de que la ruta sea correcta
 import { showError, showSuccess } from "../../../shared/utils/toast.js";
 
 export const UserModal = ({ isOpen, onClose, user }) => {
-    const { saveUser } = useSaveUser();
+    // Extraemos las funciones para crear y actualizar directamente del store
+    const { createUser, updateUser } = useUsersStore();
 
     const [loading, setLoading] = useState(false);
 
@@ -36,12 +37,18 @@ export const UserModal = ({ isOpen, onClose, user }) => {
         setLoading(true);
 
         try {
-            await saveUser(formData, user?._id || user?.id);
-
-            showSuccess(user ? "Usuario actualizado exitosamente" : "Usuario creado exitosamente");
+            if (user) {
+                // Actualizamos el usuario
+                await updateUser(user._id || user.id, formData);
+                showSuccess("Usuario actualizado exitosamente");
+            } else {
+                // Creamos el nuevo usuario
+                await createUser(formData);
+                showSuccess("Usuario creado exitosamente");
+            }
             onClose();
         } catch (error) {
-            showError("Error al guardar el usuario");
+            showError(user ? "Error al actualizar el usuario" : "Error al crear el usuario");
         } finally {
             setLoading(false);
         }
