@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { axiosAdmin } from "../../../shared/api/Api.js"; 
+import { axiosAdmin } from "../../../shared/api/api.js";
 
 export const useTableStore = create((set, get) => ({
     tables: [],
@@ -47,11 +47,11 @@ export const useTableStore = create((set, get) => ({
     updateTable: async (id, tableData) => {
         try {
             set({ loading: true, error: null });
-            
+
             const response = await axiosAdmin.put(`/tables/${id}`, tableData);
-            
+
             set((state) => ({
-                tables: state.tables.map((table) => 
+                tables: state.tables.map((table) =>
                     (table._id || table.id) === id ? (response.data.data || response.data) : table
                 ),
                 loading: false,
@@ -69,7 +69,7 @@ export const useTableStore = create((set, get) => ({
         try {
             set({ loading: true, error: null });
             await axiosAdmin.put(`/tables/${id}/deactivate`);
-            
+
             set((state) => ({
                 tables: state.tables.filter((table) => (table._id || table.id) !== id),
                 loading: false,

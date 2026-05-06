@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { axiosAdmin } from "../../../shared/api/Api.js"; 
+import { axiosAdmin } from "../../../shared/api/api.js";
 
 export const useRestaurantStore = create((set, get) => ({
   restaurants: [],
@@ -46,9 +46,9 @@ export const useRestaurantStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/restaurants/${id}`, restaurantData);
-      
+
       set((state) => ({
-        restaurants: state.restaurants.map((restaurant) => 
+        restaurants: state.restaurants.map((restaurant) =>
           restaurant._id === id ? (response.data.data || response.data) : restaurant
         ),
         loading: false,
@@ -65,9 +65,9 @@ export const useRestaurantStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/restaurants/${id}/activate`);
-      
+
       set((state) => ({
-        restaurants: state.restaurants.map((restaurant) => 
+        restaurants: state.restaurants.map((restaurant) =>
           restaurant._id === id ? (response.data.data || response.data) : restaurant
         ),
         loading: false,
@@ -84,9 +84,9 @@ export const useRestaurantStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/restaurants/${id}/deactivate`);
-      
+
       set((state) => ({
-        restaurants: state.restaurants.map((restaurant) => 
+        restaurants: state.restaurants.map((restaurant) =>
           restaurant._id === id ? (response.data.data || response.data) : restaurant
         ),
         loading: false,

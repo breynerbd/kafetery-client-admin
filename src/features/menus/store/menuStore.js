@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { axiosAdmin } from "../../../shared/api/Api.js"; 
+import { axiosAdmin } from "../../../shared/api/api.js";
 
 export const useMenuStore = create((set, get) => ({
   menus: [],
@@ -46,9 +46,9 @@ export const useMenuStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/menus/${id}`, menuData);
-      
+
       set((state) => ({
-        menus: state.menus.map((m) => 
+        menus: state.menus.map((m) =>
           m._id === id ? (response.data.data || response.data) : m
         ),
         loading: false,
@@ -65,9 +65,9 @@ export const useMenuStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/menus/${id}/deactivate`);
-      
+
       set((state) => ({
-        menus: state.menus.map((m) => 
+        menus: state.menus.map((m) =>
           m._id === id ? (response.data.data || response.data) : m
         ),
         loading: false,

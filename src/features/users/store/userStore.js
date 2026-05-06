@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { axiosAdmin } from "../../../shared/api/Api.js"; 
+import { axiosAdmin } from "../../../shared/api/api.js";
 
 export const useUsersStore = create((set, get) => ({
   users: [],
@@ -46,9 +46,9 @@ export const useUsersStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/users/${id}`, userData);
-      
+
       set((state) => ({
-        users: state.users.map((user) => 
+        users: state.users.map((user) =>
           user._id === id ? (response.data.data || response.data) : user
         ),
         loading: false,
@@ -65,9 +65,9 @@ export const useUsersStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/users/${id}/activate`);
-      
+
       set((state) => ({
-        users: state.users.map((user) => 
+        users: state.users.map((user) =>
           user._id === id ? (response.data.data || response.data) : user
         ),
         loading: false,
@@ -84,9 +84,9 @@ export const useUsersStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/users/${id}/deactivate`);
-      
+
       set((state) => ({
-        users: state.users.map((user) => 
+        users: state.users.map((user) =>
           user._id === id ? (response.data.data || response.data) : user
         ),
         loading: false,

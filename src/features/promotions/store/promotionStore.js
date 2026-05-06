@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { axiosAdmin } from "../../../shared/api/Api.js"; 
+import { axiosAdmin } from "../../../shared/api/api.js";
 
 export const usePromotionsStore = create((set, get) => ({
   promotions: [],
@@ -46,9 +46,9 @@ export const usePromotionsStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/promotions/${id}`, promotionData);
-      
+
       set((state) => ({
-        promotions: state.promotions.map((promo) => 
+        promotions: state.promotions.map((promo) =>
           (promo._id || promo.id) === id ? (response.data.data || response.data) : promo
         ),
         loading: false,
@@ -65,9 +65,9 @@ export const usePromotionsStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/promotions/${id}/activate`, {});
-      
+
       set((state) => ({
-        promotions: state.promotions.map((promo) => 
+        promotions: state.promotions.map((promo) =>
           (promo._id || promo.id) === id ? (response.data.data || response.data) : promo
         ),
         loading: false,
@@ -84,9 +84,9 @@ export const usePromotionsStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/promotions/${id}/deactivate`, {});
-      
+
       set((state) => ({
-        promotions: state.promotions.map((promo) => 
+        promotions: state.promotions.map((promo) =>
           (promo._id || promo.id) === id ? (response.data.data || response.data) : promo
         ),
         loading: false,

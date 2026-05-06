@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { axiosAdmin } from "../../../shared/api/Api.js"; 
+import { axiosAdmin } from "../../../shared/api/api.js";
 
 export const useReservationsStore = create((set, get) => ({
   reservations: [],
@@ -46,9 +46,9 @@ export const useReservationsStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/reservations/${id}`, reservationData);
-      
+
       set((state) => ({
-        reservations: state.reservations.map((res) => 
+        reservations: state.reservations.map((res) =>
           (res._id || res.id) === id ? (response.data.data || response.data) : res
         ),
         loading: false,
@@ -65,9 +65,9 @@ export const useReservationsStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/reservations/${id}/deactivate`);
-      
+
       set((state) => ({
-        reservations: state.reservations.map((res) => 
+        reservations: state.reservations.map((res) =>
           (res._id || res.id) === id ? (response.data.data || response.data) : res
         ),
         loading: false,

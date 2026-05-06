@@ -1,4 +1,8 @@
-export const Sidebar = ({ activeTab, setActiveTab }) => {
+import { Link, useLocation } from "react-router-dom";
+
+export const Sidebar = () => {
+  const location = useLocation();
+
   const items = [
     { id: "dashboard", label: "Dashboard", icon: <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
     { id: "users", label: "Usuarios", icon: <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /> },
@@ -13,35 +17,59 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
     <aside className="w-72 bg-white min-h-[calc(100vh-5rem)] p-6 border-r border-[#EADDCA]/50 shadow-[4px_0_24px_rgba(74,55,40,0.02)]">
       <nav>
-        <p className="text-[10px] font-black text-[#D2B48C] uppercase tracking-[0.2em] mb-6 px-4">Menú Principal</p>
+        <p className="text-[10px] font-black text-[#D2B48C] uppercase tracking-[0.2em] mb-6 px-4">
+          Menú Principal
+        </p>
+
         <ul className="space-y-2">
           {items.map((item) => {
-            const isActive = activeTab === item.id;
+            const isActive = location.pathname === `/dashboard/${item.id}`;
+
             return (
               <li key={item.id} className="group">
-                <div
-                  onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all duration-300 cursor-pointer border ${isActive
-                      ? "bg-[#FDF8F3] text-[#4A3728] border-[#EADDCA]/50 shadow-sm"
-                      : "text-[#6F4E37] border-transparent hover:bg-gray-50"
+                <Link
+                  to={`/dashboard/${item.id}`}
+                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all duration-300 border ${isActive
+                    ? "bg-[#FDF8F3] text-[#4A3728] border-[#EADDCA]/50 shadow-sm"
+                    : "text-[#6F4E37] border-transparent hover:bg-gray-50"
                     }`}
                 >
-                  <div className={`p-2 rounded-lg transition-colors ${isActive ? "bg-white border-[#EADDCA]/30" : "bg-gray-50 group-hover:bg-white"}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5 text-[#8B4513]">
+                  <div
+                    className={`p-2 rounded-lg transition-colors ${isActive
+                      ? "bg-white border-[#EADDCA]/30"
+                      : "bg-gray-50 group-hover:bg-white"
+                      }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.8}
+                      stroke="currentColor"
+                      className="w-5 h-5 text-[#8B4513]"
+                    >
                       {item.icon}
                     </svg>
                   </div>
-                  <span className="text-sm tracking-tight">{item.label}</span>
-                </div>
+
+                  <span className="text-sm tracking-tight">
+                    {item.label}
+                  </span>
+                </Link>
               </li>
             );
           })}
         </ul>
       </nav>
+
       <div className="mt-10 pt-6 border-t border-[#EADDCA]/30">
         <div className="bg-[#4A3728] rounded-2xl p-5 text-center shadow-lg shadow-brown-900/20">
-          <p className="text-[10px] font-bold text-[#EADDCA] uppercase tracking-widest mb-1">Kafetery Pro</p>
-          <p className="text-[9px] text-white/60 leading-relaxed">Soporte técnico activo las 24h</p>
+          <p className="text-[10px] font-bold text-[#EADDCA] uppercase tracking-widest mb-1">
+            Kafetery Pro
+          </p>
+          <p className="text-[9px] text-white/60 leading-relaxed">
+            Soporte técnico activo las 24h
+          </p>
         </div>
       </div>
     </aside>

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { axiosAdmin } from "../../../shared/api/Api.js"; 
+import { axiosAdmin } from "../../../shared/api/api.js";
 
 export const useOrdersStore = create((set, get) => ({
   orders: [],
@@ -46,9 +46,9 @@ export const useOrdersStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/orders/${id}`, orderData);
-      
+
       set((state) => ({
-        orders: state.orders.map((order) => 
+        orders: state.orders.map((order) =>
           order._id === id ? (response.data.data || response.data) : order
         ),
         loading: false,
@@ -65,9 +65,9 @@ export const useOrdersStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       const response = await axiosAdmin.put(`/orders/${id}/deactivate`);
-      
+
       set((state) => ({
-        orders: state.orders.map((order) => 
+        orders: state.orders.map((order) =>
           order._id === id ? (response.data.data || response.data) : order
         ),
         loading: false,
