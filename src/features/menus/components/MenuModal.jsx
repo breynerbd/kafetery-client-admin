@@ -1,20 +1,15 @@
 import { useState, useEffect } from "react";
 import { useSaveMenu } from "../hooks/useSaveMenu.js";
 import { showError, showSuccess } from "../../../shared/utils/toast.js";
+import { X, Utensils, DollarSign, Package, Clock, MapPin } from "lucide-react";
 
 export const MenuModal = ({ isOpen, onClose, menu }) => {
     const { saveMenu } = useSaveMenu();
     const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
-        name: "",
-        description: "",
-        price: "",
-        stock: "",
-        prepTime: "",
-        availableFrom: "",
-        availableTo: "",
-        restaurant: ""
+        name: "", description: "", price: "", stock: "",
+        prepTime: "", availableFrom: "", availableTo: "", restaurant: ""
     });
 
     useEffect(() => {
@@ -28,19 +23,10 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                     prepTime: menu.prepTime || "",
                     availableFrom: menu.availableFrom || "",
                     availableTo: menu.availableTo || "",
-                    restaurant: menu.restaurant || ""
+                    restaurant: menu.restaurant?._id || menu.restaurant || ""
                 });
             } else {
-                setFormData({ 
-                    name: "", 
-                    description: "", 
-                    price: "", 
-                    stock: "",
-                    prepTime: "",
-                    availableFrom: "",
-                    availableTo: "",
-                    restaurant: "" 
-                });
+                setFormData({ name: "", description: "", price: "", stock: "", prepTime: "", availableFrom: "", availableTo: "", restaurant: "" });
             }
         }
     }, [menu, isOpen]);
@@ -48,13 +34,12 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-
         try {
             await saveMenu(formData, menu?._id || menu?.id);
-            showSuccess(menu ? "Platillo actualizado exitosamente" : "Platillo agregado al menú");
+            showSuccess(menu ? "Actualizado correctamente" : "Platillo creado");
             onClose();
         } catch (error) {
-            showError(menu ? "Error al actualizar el platillo" : "Error al agregar el platillo");
+            showError("Ocurrió un problema");
         } finally {
             setLoading(false);
         }
@@ -63,138 +48,126 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-[#4A3728]/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300 border border-[#EADDCA]/50">
-
-                <div className="p-6 text-white shrink-0" style={{ background: "linear-gradient(135deg, #4A3728 0%, #8B4513 100%)" }}>
+        <div className="fixed inset-0 bg-[#4A3728]/80 backdrop-blur-md flex justify-center items-end md:items-center z-[100] p-0 md:p-4">
+            <div className="bg-white rounded-t-[2.5rem] md:rounded-[3rem] shadow-2xl w-full max-w-xl max-h-[95vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom md:zoom-in duration-300 border border-[#EADDCA]/50">
+                
+                {/* Header Modal */}
+                <div className="p-6 md:p-8 text-white shrink-0" style={{ background: "linear-gradient(135deg, #4A3728 0%, #8B4513 100%)" }}>
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-black uppercase tracking-tighter">
-                            {menu ? "Editar Platillo" : "Nuevo Platillo"}
-                        </h2>
-                        <button 
-                            type="button" 
-                            onClick={onClose} 
-                            className="text-3xl text-[#EADDCA] hover:text-white transition-transform hover:scale-110"
-                        >
-                            &times;
+                        <div className="space-y-1">
+                            <h2 className="text-2xl font-black uppercase tracking-tighter leading-none italic">
+                                {menu ? "Editar Menú" : "Nuevo Menú"}
+                            </h2>
+                            <p className="text-[10px] text-[#EADDCA] font-bold uppercase tracking-widest opacity-80">Configuración de carta</p>
+                        </div>
+                        <button onClick={onClose} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all">
+                            <X size={24} />
                         </button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden">
-                    <div className="p-8 overflow-y-auto space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="md:col-span-2">
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Nombre del Platillo</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="Ej. Desayuno Chapín"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#4A3728] font-bold text-sm outline-none shadow-inner focus:border-[#8B4513]"
-                                />
-                            </div>
+                <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden bg-[#FDF8F3]/30">
+                    <div className="p-6 md:p-10 overflow-y-auto space-y-6">
+                        
+                        {/* Nombre */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2">
+                                <Utensils size={12}/> Nombre del Platillo
+                            </label>
+                            <input
+                                type="text" required value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                className="w-full px-5 py-4 bg-white border border-[#EADDCA] rounded-2xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513] transition-all shadow-sm"
+                                placeholder="Ej. Pepián Tradicional"
+                            />
+                        </div>
 
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Precio (Q)</label>
+                        {/* Grid 2 Columnas */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2">
+                                    <DollarSign size={12}/> Precio
+                                </label>
                                 <input
-                                    type="number"
-                                    step="0.01"
-                                    required
-                                    value={formData.price}
+                                    type="number" step="0.01" required value={formData.price}
                                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                    className="w-full px-5 py-4 bg-white border border-[#EADDCA] rounded-2xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513]"
                                     placeholder="0.00"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513]"
                                 />
                             </div>
-
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">ID Restaurante</label>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2">
+                                    <Package size={12}/> Stock
+                                </label>
                                 <input
-                                    type="text"
-                                    required
-                                    value={formData.restaurant}
-                                    onChange={(e) => setFormData({ ...formData, restaurant: e.target.value })}
-                                    placeholder="ID de Referencia"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#8B4513] font-mono text-[10px] outline-none focus:border-[#8B4513]"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Stock</label>
-                                <input
-                                    type="number"
-                                    required
-                                    value={formData.stock}
+                                    type="number" required value={formData.stock}
                                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                                    placeholder="10"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513]"
+                                    className="w-full px-5 py-4 bg-white border border-[#EADDCA] rounded-2xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513]"
+                                    placeholder="20"
                                 />
                             </div>
+                        </div>
 
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Tiempo de preparación (min)</label>
+                        {/* Sucursal ID */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2">
+                                <MapPin size={12}/> Sucursal (ID)
+                            </label>
+                            <input
+                                type="text" required value={formData.restaurant}
+                                onChange={(e) => setFormData({ ...formData, restaurant: e.target.value })}
+                                className="w-full px-5 py-4 bg-white border border-[#EADDCA] rounded-2xl text-[#8B4513] font-mono text-xs outline-none focus:border-[#8B4513]"
+                                placeholder="ID del restaurante"
+                            />
+                        </div>
+
+                        {/* Tiempos y Horarios */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2 italic">
+                                    <Clock size={12}/> Prep. (Min)
+                                </label>
                                 <input
-                                    type="number"
-                                    required
-                                    value={formData.prepTime}
+                                    type="number" required value={formData.prepTime}
                                     onChange={(e) => setFormData({ ...formData, prepTime: e.target.value })}
-                                    placeholder="15"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513]"
+                                    className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-[#4A3728] font-bold text-sm"
                                 />
                             </div>
-
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Disponible desde</label>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1">Desde</label>
                                 <input
-                                    type="time"
-                                    required
-                                    value={formData.availableFrom}
+                                    type="time" required value={formData.availableFrom}
                                     onChange={(e) => setFormData({ ...formData, availableFrom: e.target.value })}
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513]"
+                                    className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-[#4A3728] font-bold text-xs"
                                 />
                             </div>
-
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Disponible hasta</label>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1">Hasta</label>
                                 <input
-                                    type="time"
-                                    required
-                                    value={formData.availableTo}
+                                    type="time" required value={formData.availableTo}
                                     onChange={(e) => setFormData({ ...formData, availableTo: e.target.value })}
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513]"
+                                    className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-[#4A3728] font-bold text-xs"
                                 />
                             </div>
+                        </div>
 
-                            <div className="md:col-span-2">
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Descripción / Ingredientes</label>
-                                <textarea
-                                    rows="3"
-                                    required
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    placeholder="Ej. Huevos, frijoles y plátano"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#6F4E37] text-sm outline-none resize-none focus:border-[#8B4513]"
-                                ></textarea>
-                            </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 italic">Descripción / Ingredientes</label>
+                            <textarea
+                                rows="3" required value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                className="w-full px-5 py-4 bg-white border border-[#EADDCA] rounded-2xl text-[#6F4E37] text-sm outline-none resize-none focus:border-[#8B4513]"
+                                placeholder="Describe el platillo..."
+                            ></textarea>
                         </div>
                     </div>
 
-                    <div className="p-8 border-t border-[#EADDCA]/30 bg-white shrink-0">
+                    <div className="p-8 md:p-10 bg-white border-t border-[#EADDCA]/30 shrink-0">
                         <button 
-                            type="submit" 
-                            disabled={loading}
-                            className="w-full py-3.5 rounded-xl bg-[#4A3728] text-white hover:bg-[#6F4E37] transition font-bold shadow-lg text-sm uppercase tracking-widest flex items-center justify-center min-h-[50px]"
+                            type="submit" disabled={loading}
+                            className="w-full py-4 rounded-2xl bg-[#4A3728] text-white hover:bg-[#8B4513] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-2xl active:scale-95 flex items-center justify-center min-h-[60px]"
                         >
-                            {loading ? "Cargando..." : (menu ? "Guardar Cambios" : "Agregar al Menú")}
-                        </button>
-                        <button 
-                            type="button" 
-                            onClick={onClose} 
-                            className="w-full py-2 mt-2 text-[#D2B48C] hover:text-[#8B4513] transition text-[10px] font-black uppercase tracking-[0.2em]"
-                        >
-                            Cancelar
+                            {loading ? "PROCESANDO..." : (menu ? "GUARDAR CAMBIOS" : "AGREGAR A CARTA")}
                         </button>
                     </div>
                 </form>

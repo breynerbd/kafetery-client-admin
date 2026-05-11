@@ -1,36 +1,48 @@
 import { useState, useEffect } from "react";
 import { useSaveOrder } from "../hooks/useSaveOrder.js";
 import { showError, showSuccess } from "../../../shared/utils/toast.js";
+import { X, User, Utensils, Hash, Plus, Trash2, Fingerprint, Activity } from "lucide-react";
 
 export const OrderModal = ({ isOpen, onClose, order }) => {
     const { saveOrder } = useSaveOrder();
     const [loading, setLoading] = useState(false);
-
     const [formData, setFormData] = useState({
-        user: "",
-        restaurant: "",
-        table: "",
+        user: "", 
+        restaurant: "", 
+        table: "", 
         items: [{ menu: "", quantity: 1 }],
-        totalPrice: ""
+        status: "PENDING"
     });
+
+    const statusOptions = [
+        { value: 'PENDING', label: 'Pendiente' },
+        { value: 'CONFIRMED', label: 'Confirmada' },
+        { value: 'PREPARING', label: 'En Preparación' },
+        { value: 'READY', label: 'Listo para Entrega' },
+        { value: 'DELIVERED', label: 'Entregado' },
+        { value: 'CANCELED', label: 'Cancelado' }
+    ];
 
     useEffect(() => {
         if (isOpen) {
             if (order) {
                 setFormData({
-                    user: order.user || "",
-                    restaurant: order.restaurant || "",
+                    user: order.user?._id || order.user || "",
+                    restaurant: order.restaurant?._id || order.restaurant || "",
                     table: order.table || "",
-                    items: order.items || [{ menu: "", quantity: 1 }],
-                    totalPrice: order.totalPrice || ""
+                    status: order.status || "PENDING",
+                    items: order.items?.map(item => ({
+                        menu: item.menu?._id || item.menu || "",
+                        quantity: item.quantity || 1
+                    })) || [{ menu: "", quantity: 1 }]
                 });
             } else {
                 setFormData({ 
                     user: "", 
                     restaurant: "", 
                     table: "", 
-                    items: [{ menu: "", quantity: 1 }], 
-                    totalPrice: "" 
+                    items: [{ menu: "", quantity: 1 }],
+                    status: "PENDING" 
                 });
             }
         }
@@ -57,147 +69,126 @@ export const OrderModal = ({ isOpen, onClose, order }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-
         try {
             await saveOrder(formData, order?._id || order?.id);
             showSuccess(order ? "Orden actualizada exitosamente" : "Orden creada exitosamente");
             onClose();
         } catch (error) {
-            showError(order ? "Error al actualizar la orden" : "Error al crear la orden");
-        } finally {
-            setLoading(false);
-        }
+            showError(order ? "Error al actualizar" : "Error al crear");
+        } finally { setLoading(false); }
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-[#4A3728]/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300 border border-[#EADDCA]/50">
-
-                <div className="p-6 text-white shrink-0" style={{ background: "linear-gradient(135deg, #4A3728 0%, #8B4513 100%)" }}>
+        <div className="fixed inset-0 bg-[#4A3728]/80 backdrop-blur-md flex justify-center items-end md:items-center z-[100] p-0 md:p-4">
+            <div className="bg-white rounded-t-[2.5rem] md:rounded-[3rem] shadow-2xl w-full max-w-2xl max-h-[94vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom md:zoom-in duration-300 border border-[#EADDCA]/50">
+                
+                {/* Header */}
+                <div className="p-6 md:p-8 text-white shrink-0" style={{ background: "linear-gradient(135deg, #4A3728 0%, #8B4513 100%)" }}>
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-black uppercase tracking-tighter">
-                            {order ? "Resumen de Comanda" : "Nueva Orden"}
-                        </h2>
-                        <button onClick={onClose} className="text-3xl text-[#EADDCA] hover:text-white">&times;</button>
+                        <div>
+                            <h2 className="text-2xl font-black uppercase tracking-tighter italic leading-none">
+                                {order ? "Editar Orden" : "Nueva Orden"}
+                            </h2>
+                            {order && (
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="text-[9px] font-black uppercase bg-white/20 px-2 py-0.5 rounded tracking-widest text-[#EADDCA]">System ID:</span>
+                                    <code className="text-[10px] font-mono text-white opacity-80">{order._id || order.id}</code>
+                                </div>
+                            )}
+                        </div>
+                        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-2xl leading-none">&times;</button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden">
-                    <div className="p-8 overflow-y-auto space-y-6">
-                        {/* IDs de cabecera */}
+                <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden bg-[#FDF8F3]/30">
+                    <div className="p-6 md:p-10 overflow-y-auto space-y-6">
+                        
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">ID Cliente</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.user}
-                                    onChange={(e) => setFormData({ ...formData, user: e.target.value })}
-                                    placeholder="69a705e5b039051343b9d97a"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#8B4513] font-mono text-[10px] outline-none focus:border-[#8B4513]"
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-widest"><User size={12}/> ID Cliente</label>
+                                <input 
+                                    type="text" required value={formData.user} 
+                                    onChange={(e) => setFormData({ ...formData, user: e.target.value })} 
+                                    className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-[10px] font-mono outline-none focus:border-[#8B4513] transition-colors" 
+                                    placeholder="ID de Cliente" 
                                 />
                             </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">ID Restaurante</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.restaurant}
-                                    onChange={(e) => setFormData({ ...formData, restaurant: e.target.value })}
-                                    placeholder="69a7073eb039051343b9d993"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#8B4513] font-mono text-[10px] outline-none focus:border-[#8B4513]"
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-widest"><Fingerprint size={12}/> Restaurante</label>
+                                <input 
+                                    type="text" required value={formData.restaurant} 
+                                    onChange={(e) => setFormData({ ...formData, restaurant: e.target.value })} 
+                                    className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-[10px] font-mono outline-none focus:border-[#8B4513] transition-colors" 
+                                    placeholder="ID Restaurante" 
                                 />
                             </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">ID Mesa</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.table}
-                                    onChange={(e) => setFormData({ ...formData, table: e.target.value })}
-                                    placeholder="ID de Mesa"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#8B4513] font-mono text-[10px] outline-none focus:border-[#8B4513]"
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-widest"><Hash size={12}/> Mesa</label>
+                                <input 
+                                    type="text" required value={formData.table} 
+                                    onChange={(e) => setFormData({ ...formData, table: e.target.value })} 
+                                    className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-xs font-bold outline-none focus:border-[#8B4513] transition-colors" 
+                                    placeholder="No. Mesa" 
                                 />
                             </div>
                         </div>
 
-                        {/* Listado de Items */}
-                        <div>
-                            <div className="flex justify-between items-center mb-3">
-                                <label className="text-[10px] font-black uppercase text-[#D2B48C] block tracking-[0.15em]">Productos en la Orden</label>
-                                <button 
-                                    type="button" 
-                                    onClick={handleAddItem}
-                                    className="text-[9px] font-black uppercase tracking-wider bg-[#EADDCA] text-[#4A3728] px-3 py-1 rounded-lg hover:bg-[#D2B48C] transition-all"
-                                >
-                                    + Agregar
+                        {/* ESTADO DE LA ORDEN */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-widest"><Activity size={12}/> Estado de la Orden</label>
+                            <select 
+                                value={formData.status}
+                                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-xs font-bold text-[#4A3728] outline-none focus:border-[#8B4513] appearance-none transition-colors"
+                            >
+                                {statusOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* SECCIÓN ITEMS */}
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center px-1">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 tracking-widest"><Utensils size={12}/> Comanda (Menú)</label>
+                                <button type="button" onClick={handleAddItem} className="text-[#8B4513] text-[10px] font-black uppercase flex items-center gap-1 hover:bg-brown-50 px-2 py-1 rounded-lg transition-colors">
+                                    <Plus size={12}/> Agregar Item
                                 </button>
                             </div>
-                            <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1">
-                                {formData.items.map((item, idx) => (
-                                    <div key={idx} className="flex gap-3 items-end bg-[#FDF8F3] p-4 rounded-2xl border border-[#EADDCA]/30">
-                                        <div className="flex-1">
-                                            <label className="text-[9px] font-bold text-[#8B4513] uppercase mb-1 block">ID Menú</label>
-                                            <input
-                                                type="text"
+                            
+                            <div className="space-y-3">
+                                {formData.items.map((item, index) => (
+                                    <div key={index} className="flex gap-2 items-center bg-white p-3 rounded-2xl border border-[#EADDCA]/50 shadow-sm animate-in slide-in-from-left-2">
+                                        <input 
+                                            placeholder="ID del Menú" 
+                                            value={item.menu} 
+                                            onChange={(e) => handleItemChange(index, "menu", e.target.value)}
+                                            className="flex-1 bg-transparent text-[11px] font-mono outline-none px-2"
+                                            required
+                                        />
+                                        <div className="flex items-center bg-[#FDF8F3] rounded-xl border border-[#EADDCA]/30">
+                                            <input 
+                                                type="number" min="1"
+                                                value={item.quantity} 
+                                                onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                                                className="w-12 bg-transparent text-center font-bold text-[#8B4513] py-2 text-xs outline-none"
                                                 required
-                                                value={item.menu}
-                                                onChange={(e) => handleItemChange(idx, "menu", e.target.value)}
-                                                className="w-full bg-transparent text-xs font-mono outline-none text-[#4A3728]"
-                                                placeholder="69a70accb039051343b9d9ab"
                                             />
                                         </div>
-                                        <div className="w-20">
-                                            <label className="text-[9px] font-bold text-[#8B4513] uppercase mb-1 block">Cant.</label>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                required
-                                                value={item.quantity}
-                                                onChange={(e) => handleItemChange(idx, "quantity", e.target.value)}
-                                                className="w-full bg-transparent text-sm font-black outline-none text-[#4A3728]"
-                                            />
-                                        </div>
-                                        {formData.items.length > 1 && (
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveItem(idx)}
-                                                className="text-red-600 hover:text-red-800 font-black text-xs px-2 py-1"
-                                            >
-                                                X
-                                            </button>
-                                        )}
+                                        <button type="button" onClick={() => handleRemoveItem(index)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-xl transition-colors">
+                                            <Trash2 size={16}/>
+                                        </button>
                                     </div>
                                 ))}
                             </div>
                         </div>
-
-                        {/* Precio Total */}
-                        <div className="pt-4 border-t border-[#EADDCA]/30">
-                            <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Monto Total a Cobrar</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-[#4A3728]">Q</span>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    value={formData.totalPrice}
-                                    onChange={(e) => setFormData({ ...formData, totalPrice: e.target.value })}
-                                    placeholder="0.00"
-                                    className="w-full pl-10 pr-4 py-4 bg-[#4A3728] text-white rounded-2xl font-black text-xl outline-none"
-                                />
-                            </div>
-                        </div>
                     </div>
 
-                    <div className="p-8 border-t border-[#EADDCA]/30 bg-white shrink-0">
-                        <button 
-                            type="submit" 
-                            disabled={loading}
-                            className="w-full py-3.5 rounded-xl bg-[#8B4513] text-white hover:bg-[#6F4E37] transition font-bold shadow-lg text-sm uppercase tracking-widest flex items-center justify-center min-h-[50px]"
-                        >
-                            {loading ? "Cargando..." : (order ? "Actualizar Orden" : "Generar Ticket de Venta")}
+                    <div className="p-8 md:p-10 bg-white border-t border-[#EADDCA]/30 shrink-0">
+                        <button type="submit" disabled={loading} className="w-full py-4 rounded-2xl bg-[#4A3728] text-white hover:bg-[#8B4513] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-2xl active:scale-95 flex items-center justify-center min-h-[60px]">
+                            {loading ? "PROCESANDO..." : (order ? "GUARDAR CAMBIOS" : "LANZAR ORDEN")}
                         </button>
                     </div>
                 </form>

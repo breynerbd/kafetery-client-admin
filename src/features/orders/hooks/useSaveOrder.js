@@ -9,17 +9,19 @@ export const useSaveOrder = () => {
             user: data.user,
             restaurant: data.restaurant,
             table: data.table,
+            status: data.status,
             items: data.items.map(item => ({
                 menu: item.menu,
                 quantity: Number(item.quantity)
             })),
-            totalPrice: Number(data.totalPrice)
         };
 
         try {
             if (orderId) {
+                console.log("Actualizando orden con ID:", orderId, "Payload:", payload);
                 await updateOrder(orderId, payload);
             } else {
+                console.log("Creando nueva orden:", payload);
                 await createOrder(payload);
             }
         } catch (error) {

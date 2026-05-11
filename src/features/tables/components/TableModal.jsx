@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useTableStore } from "../store/tableStore";
 import { showError, showSuccess } from "../../../shared/utils/toast.js";
+import { X, Hash, Users, Store } from "lucide-react";
 
 export const TableModal = ({ isOpen, onClose, table }) => {
     const { createTable, updateTable } = useTableStore();
-
     const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -19,14 +19,10 @@ export const TableModal = ({ isOpen, onClose, table }) => {
                 setFormData({
                     tableNumber: table.tableNumber || "",
                     capacity: table.capacity || "",
-                    restaurant: table.restaurant || "69a7073eb039051343b9d993"
+                    restaurant: table.restaurant?._id || table.restaurant || "69a7073eb039051343b9d993"
                 });
             } else {
-                setFormData({ 
-                    tableNumber: "", 
-                    capacity: "", 
-                    restaurant: "69a7073eb039051343b9d993" 
-                });
+                setFormData({ tableNumber: "", capacity: "", restaurant: "69a7073eb039051343b9d993" });
             }
         }
     }, [table, isOpen]);
@@ -34,7 +30,6 @@ export const TableModal = ({ isOpen, onClose, table }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-
         try {
             const payload = {
                 tableNumber: Number(formData.tableNumber),
@@ -47,11 +42,11 @@ export const TableModal = ({ isOpen, onClose, table }) => {
                 showSuccess("Mesa actualizada exitosamente");
             } else {
                 await createTable(payload);
-                showSuccess("Mesa habilitada exitosamente");
+                showSuccess("Mesa creada exitosamente");
             }
             onClose();
         } catch (error) {
-            showError(table ? "Error al actualizar la mesa" : "Error al habilitar la mesa");
+            showError("Error al procesar la mesa");
         } finally {
             setLoading(false);
         }
@@ -60,74 +55,87 @@ export const TableModal = ({ isOpen, onClose, table }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-[#4A3728]/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300 border border-[#EADDCA]/50">
-
-                {/* Header Dinámico */}
-                <div className="p-6 text-white" style={{ background: "linear-gradient(135deg, #4A3728 0%, #8B4513 100%)" }}>
+        <div className="fixed inset-0 bg-[#4A3728]/80 backdrop-blur-md flex justify-center items-end md:items-center z-[100] p-0 md:p-4">
+            <div className="bg-white rounded-t-[2.5rem] md:rounded-[3rem] shadow-2xl w-full max-w-lg max-h-[94vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom md:zoom-in duration-300 border border-[#EADDCA]/50">
+                
+                {/* Header Estilo OrderModal */}
+                <div className="p-6 md:p-8 text-white shrink-0" style={{ background: "linear-gradient(135deg, #4A3728 0%, #8B4513 100%)" }}>
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-black uppercase tracking-tighter">
-                            {table ? `Editar Mesa ${table.tableNumber}` : "Nueva Mesa"}
-                        </h2>
-                        <button onClick={onClose} className="text-3xl text-[#EADDCA] hover:text-white transition-transform hover:scale-110">&times;</button>
+                        <div>
+                            <h2 className="text-2xl font-black uppercase tracking-tighter italic leading-none">
+                                {table ? "Editar Mesa" : "Nueva Mesa"}
+                            </h2>
+                            {table && (
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="text-[9px] font-black uppercase bg-white/20 px-2 py-0.5 rounded tracking-widest text-[#EADDCA]">Mesa ID:</span>
+                                    <code className="text-[10px] font-mono text-white opacity-80">{table._id || table.id}</code>
+                                </div>
+                            )}
+                        </div>
+                        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-2xl leading-none">&times;</button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-5">
-                    {/* Número de Mesa */}
-                    <div>
-                        <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Número Identificador</label>
-                        <input
-                            type="number"
-                            required
-                            value={formData.tableNumber}
-                            onChange={(e) => setFormData({ ...formData, tableNumber: e.target.value })}
-                            placeholder="Ej. 5"
-                            className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513] shadow-inner"
-                        />
+                <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden bg-[#FDF8F3]/30">
+                    <div className="p-6 md:p-10 overflow-y-auto space-y-6">
+                        
+                        {/* Grid de Inputs */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* NÚMERO DE MESA */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-widest">
+                                    <Hash size={12}/> No. Mesa
+                                </label>
+                                <input 
+                                    type="number" 
+                                    required 
+                                    value={formData.tableNumber} 
+                                    onChange={(e) => setFormData({ ...formData, tableNumber: e.target.value })} 
+                                    className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-sm font-bold text-[#4A3728] outline-none focus:border-[#8B4513] transition-colors" 
+                                    placeholder="00" 
+                                />
+                            </div>
+
+                            {/* CAPACIDAD */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-widest">
+                                    <Users size={12}/> Capacidad
+                                </label>
+                                <input 
+                                    type="number" 
+                                    required 
+                                    value={formData.capacity} 
+                                    onChange={(e) => setFormData({ ...formData, capacity: e.target.value })} 
+                                    className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-sm font-bold text-[#4A3728] outline-none focus:border-[#8B4513] transition-colors" 
+                                    placeholder="Personas" 
+                                />
+                            </div>
+                        </div>
+
+                        {/* ID RESTAURANTE (Estilo ID Cliente) */}
+                        <div className="space-y-2 pt-2">
+                            <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-widest">
+                                <Store size={12}/> ID de Sucursal
+                            </label>
+                            <input 
+                                type="text" 
+                                required 
+                                value={formData.restaurant} 
+                                onChange={(e) => setFormData({ ...formData, restaurant: e.target.value })} 
+                                className="w-full px-4 py-3 bg-white border border-[#EADDCA] rounded-xl text-[10px] font-mono outline-none focus:border-[#8B4513] transition-colors" 
+                                placeholder="ID Restaurante" 
+                            />
+                        </div>
                     </div>
 
-                    {/* Capacidad */}
-                    <div>
-                        <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">Capacidad (Asientos)</label>
-                        <input
-                            type="number"
-                            required
-                            value={formData.capacity}
-                            onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                            placeholder="Ej. 4"
-                            className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#4A3728] font-bold text-sm outline-none focus:border-[#8B4513]"
-                        />
-                    </div>
-
-                    {/* Restaurant ID */}
-                    <div>
-                        <label className="text-[10px] font-black uppercase text-[#D2B48C] mb-1.5 block tracking-[0.15em]">ID de Restaurante</label>
-                        <input
-                            type="text"
-                            required
-                            value={formData.restaurant}
-                            onChange={(e) => setFormData({ ...formData, restaurant: e.target.value })}
-                            placeholder="ID de referencia"
-                            className="w-full px-4 py-3 bg-[#FDF8F3] border border-[#EADDCA]/50 rounded-xl text-[#8B4513] font-mono text-xs outline-none focus:border-[#8B4513]"
-                        />
-                    </div>
-
-                    {/* Footer de Acciones */}
-                    <div className="flex flex-col gap-3 pt-6 border-t border-[#EADDCA]/30">
+                    {/* Botón de Acción Estilo OrderModal */}
+                    <div className="p-8 md:p-10 bg-white border-t border-[#EADDCA]/30 shrink-0">
                         <button 
                             type="submit" 
-                            disabled={loading}
-                            className="w-full py-3.5 rounded-xl bg-[#4A3728] text-white hover:bg-[#6F4E37] transition font-bold shadow-lg text-sm uppercase tracking-widest flex items-center justify-center min-h-[50px]"
+                            disabled={loading} 
+                            className="w-full py-4 rounded-2xl bg-[#4A3728] text-white hover:bg-[#8B4513] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-2xl active:scale-95 flex items-center justify-center min-h-[60px]"
                         >
-                            {loading ? "Cargando..." : (table ? "Guardar Cambios" : "Habilitar Mesa")}
-                        </button>
-                        <button 
-                            type="button"
-                            onClick={onClose} 
-                            className="w-full py-2 text-[#D2B48C] hover:text-[#8B4513] transition text-[10px] font-black uppercase tracking-[0.2em]"
-                        >
-                            Cancelar
+                            {loading ? "PROCESANDO..." : (table ? "GUARDAR CAMBIOS" : "CREAR MESA")}
                         </button>
                     </div>
                 </form>
