@@ -5,12 +5,21 @@ import imgLogo from "../../../assets/img/Kafetery_logo.png";
 export const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
 
+  // Definición de ítems: El id vacío "" apunta a la raíz /dashboard (HomeDashboard)
   const items = [
-    { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
+    { id: "", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
     { id: "users", label: "Usuarios", icon: <Users size={20} /> },
     { id: "restaurants", label: "Restaurantes", icon: <Store size={20} /> },
     { id: "menus", label: "Menús", icon: <BookOpen size={20} /> },
-    { id: "tables", label: "Mesas", icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7V4a2 2 0 012-2h12a2 2 0 012 2v3m-16 0h16M4 7l2 11h12l2-11" /></svg> },
+    {
+      id: "tables",
+      label: "Mesas",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7V4a2 2 0 012-2h12a2 2 0 012 2v3m-16 0h16M4 7l2 11h12l2-11" />
+        </svg>
+      )
+    },
     { id: "reservations", label: "Reservas", icon: <Calendar size={20} /> },
     { id: "orders", label: "Órdenes", icon: <ShoppingBag size={20} /> },
     { id: "promotions", label: "Promociones", icon: <TicketPercent size={20} /> },
@@ -18,10 +27,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Overlay para móviles */}
+      {/* Overlay para móviles con desenfoque */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-[#4A3728]/40 backdrop-blur-sm z-[60] lg:hidden"
+          className="fixed inset-0 bg-[#4A3728]/40 backdrop-blur-sm z-[60] lg:hidden transition-opacity duration-300"
           onClick={onClose}
         />
       )}
@@ -34,14 +43,13 @@ export const Sidebar = ({ isOpen, onClose }) => {
           lg:static lg:z-0 lg:shadow-none lg:border-r lg:border-[#EADDCA]/50
         `}
       >
-        {/* HEADER: Aquí reemplazamos la 'K' por tu imagen */}
+        {/* LOGO Y BOTÓN CERRAR */}
         <div className="p-6 flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center gap-3">
-            {/* Contenedor del Logo */}
-            <div className="w-10 h-10 flex items-center justify-center overflow-hidden rounded-xl">
-              <img 
-                src={imgLogo} 
-                alt="Kafetery Logo" 
+            <div className="w-10 h-10 flex items-center justify-center overflow-hidden rounded-xl border border-[#EADDCA]/30">
+              <img
+                src={imgLogo}
+                alt="Kafetery Logo"
                 className="w-full h-full object-contain"
               />
             </div>
@@ -49,16 +57,16 @@ export const Sidebar = ({ isOpen, onClose }) => {
               Kafetery
             </span>
           </div>
-          
-          <button 
-            onClick={onClose} 
-            className="lg:hidden p-2 rounded-xl bg-[#FDF8F3] border border-[#EADDCA] text-[#8B4513] active:scale-95"
+
+          <button
+            onClick={onClose}
+            className="lg:hidden p-2 rounded-xl bg-[#FDF8F3] border border-[#EADDCA] text-[#8B4513] active:scale-95 transition-transform"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* NAVEGACIÓN con Scroll Independiente */}
+        {/* NAVEGACIÓN */}
         <nav className="flex-1 overflow-y-auto px-6 py-2 no-scrollbar">
           <p className="text-[10px] font-black text-[#D2B48C] uppercase tracking-[0.2em] mb-4">
             Gestión de Sistema
@@ -66,23 +74,26 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
           <ul className="space-y-1.5 pb-6">
             {items.map((item) => {
-              const isActive = location.pathname === `/dashboard/${item.id}`;
+              // Construcción de la ruta: /dashboard o /dashboard/users, etc.
+              const targetPath = item.id === "" ? "/dashboard" : `/dashboard/${item.id}`;
+              const isActive = location.pathname === targetPath;
+
               return (
-                <li key={item.id}>
+                <li key={item.id || 'home'}>
                   <Link
-                    to={`/dashboard/${item.id}`}
+                    to={targetPath}
                     onClick={() => { if (window.innerWidth < 1024) onClose(); }}
                     className={`
                       flex items-center gap-4 px-4 py-3 rounded-2xl font-bold transition-all border
-                      ${isActive 
-                        ? "bg-[#FDF8F3] text-[#4A3728] border-[#EADDCA]/60 shadow-sm translate-x-1" 
+                      ${isActive
+                        ? "bg-[#FDF8F3] text-[#4A3728] border-[#EADDCA]/60 shadow-sm translate-x-1"
                         : "text-[#8B4513]/70 border-transparent hover:bg-[#FDF8F3]/40 hover:translate-x-1"
                       }
                     `}
                   >
-                    <div className={`p-2 rounded-xl transition-colors ${
-                      isActive ? "bg-[#4A3728] text-white shadow-md" : "bg-[#FDF8F3] text-[#8B4513]"
-                    }`}>
+                    {/* Icono con contenedor dinámico */}
+                    <div className={`p-2 rounded-xl transition-colors ${isActive ? "bg-[#4A3728] text-white shadow-md" : "bg-[#FDF8F3] text-[#8B4513]"
+                      }`}>
                       {item.icon}
                     </div>
                     <span className="text-sm tracking-tight">{item.label}</span>
@@ -93,7 +104,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           </ul>
         </nav>
 
-        {/* FOOTER */}
+        {/* FOOTER DEL SIDEBAR */}
         <div className="p-6 mt-auto shrink-0 border-t border-[#FDF8F3]">
           <div className="bg-[#4A3728] rounded-[1.5rem] p-4 text-center shadow-lg shadow-brown-900/20">
             <p className="text-[10px] font-black text-[#EADDCA] uppercase tracking-widest">Kafetery Pro</p>

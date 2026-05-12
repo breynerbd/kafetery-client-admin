@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useMenuStore } from "../store/menuStore.js";
-import { useUIStore } from "../../auth/store/uiStore.js";
 import { showError, showSuccess } from "../../../shared/utils/toast.js";
 import { showConfirmToast } from "../../auth/components/ConfirmModal";
 import { MenuModal } from "./MenuModal.jsx";
-import { Edit3, Trash2, Plus, Clock, Package, Utensils } from "lucide-react";
+import { Edit3, Trash2, Plus, Clock, Package } from "lucide-react";
 
 export const Menus = () => {
     const { menus = [], loading, error, getMenus, deactivateMenu } = useMenuStore();
@@ -34,7 +33,8 @@ export const Menus = () => {
     };
 
     return (
-        <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto min-h-screen">
+        /* pb-24 asegura espacio para el final del contenido en móvil */
+        <div className="p-4 md:p-8 lg:p-12 pb-24 md:pb-32 max-w-7xl mx-auto min-h-screen overflow-y-auto">
             {/* HEADER */}
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-8 lg:mb-12">
                 <div className="space-y-1 text-left">
@@ -42,11 +42,11 @@ export const Menus = () => {
                         Sala de Control
                     </h1>
                     <p className="text-[#D2B48C] font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] flex items-center gap-2">
-                        <span className="w-6 md:w-10 h-[2px] bg-[#8B4513]"></span> 
+                        <span className="w-6 md:w-10 h-[2px] bg-[#8B4513]"></span>
                         Gestión de Menús
                     </p>
                 </div>
-                
+
                 <button
                     onClick={handleCreate}
                     className="group bg-[#4A3728] text-white px-8 py-4 rounded-2xl font-black hover:bg-[#8B4513] transition-all shadow-xl shadow-[#4A3728]/20 flex items-center justify-center gap-3 active:scale-95 w-full md:w-auto"
@@ -57,7 +57,7 @@ export const Menus = () => {
             </div>
 
             {/* VISTA MÓVIL (CARDS) */}
-            <div className="grid grid-cols-1 gap-4 md:hidden">
+            <div className="grid grid-cols-1 gap-4 md:hidden mb-10">
                 {menus.map((item) => (
                     <div key={item._id} className="bg-white p-6 rounded-[2.5rem] border border-[#EADDCA]/50 shadow-lg">
                         <div className="mb-4">
@@ -94,7 +94,7 @@ export const Menus = () => {
             </div>
 
             {/* VISTA TABLETA Y PC (TABLA) */}
-            <div className="hidden md:block bg-white rounded-[2.5rem] shadow-2xl shadow-brown-900/10 border border-[#EADDCA]/50 overflow-hidden">
+            <div className="hidden md:block bg-white rounded-[2.5rem] shadow-2xl border border-[#EADDCA]/50 overflow-hidden mb-10">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-[#FDF8F3] border-b border-[#EADDCA]/50">
@@ -111,7 +111,6 @@ export const Menus = () => {
                                 menus.map((item) => (
                                     <tr key={item._id} className="hover:bg-[#FDF8F3]/50 transition-colors group">
                                         <td className="px-8 py-5">
-                                            {/* AQUÍ EL ID COMPLETO SEGÚN TU SOLICITUD */}
                                             <div className="space-y-1.5">
                                                 <div className="font-black text-[#4A3728] uppercase text-sm leading-none">
                                                     {item.name}

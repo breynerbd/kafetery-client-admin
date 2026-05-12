@@ -1,6 +1,6 @@
 import imgLogo from "../../../assets/img/Kafetery_logo.png";
-import { Menu, Bell } from "lucide-react"; 
-import { AvatarUser } from "../ui/AvatarUser"; // Asegúrate de que la ruta sea correcta
+import { Menu, Bell } from "lucide-react";
+import { AvatarUser } from "../ui/AvatarUser";
 import { useAuthStore } from "../../../features/auth/store/authStore.js";
 
 export const Navbar = ({ onMenuClick }) => {
@@ -12,7 +12,7 @@ export const Navbar = ({ onMenuClick }) => {
 
                 {/* IZQUIERDA: Botón Móvil + Logo */}
                 <div className="flex items-center gap-3">
-                    <button 
+                    <button
                         onClick={onMenuClick}
                         className="lg:hidden p-2 text-[#4A3728] hover:bg-[#FDF8F3] rounded-xl transition-colors"
                     >
@@ -57,7 +57,7 @@ export const Navbar = ({ onMenuClick }) => {
                                 {user?.role || "Gerencia"}
                             </p>
                         </div>
-                        
+
                         {/* El componente AvatarUser que maneja el menú y el logo */}
                         <AvatarUser />
                     </div>
