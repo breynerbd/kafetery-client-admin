@@ -37,18 +37,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
       >
         {/* LOGO Y BOTÓN CERRAR */}
         <div className="p-6 flex items-center justify-between bg-white shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center overflow-hidden rounded-xl border border-[#EADDCA]/30">
-              <img
-                src={imgLogo}
-                alt="Kafetery Logo"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <span className="font-black text-[#4A3728] text-sm tracking-widest uppercase italic">
-              Kafetery
-            </span>
-          </div>
 
           <button
             onClick={onClose}

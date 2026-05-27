@@ -6,8 +6,7 @@ export const useSaveUser = () => {
 
     const saveUser = async (data, userId = null) => {
         const formData = new FormData();
-        
-        formData.append("auth_id", data.auth_id);
+
         formData.append("name", data.name);
         formData.append("email", data.email);
         formData.append("role", data.role);
