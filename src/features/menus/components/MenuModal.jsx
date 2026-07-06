@@ -3,17 +3,26 @@ import { useSaveMenu } from "../hooks/useSaveMenu.js";
 import { useRestaurantStore } from "../../restaurants/store/restaurantStore.js";
 import { showError, showSuccess } from "../../../shared/utils/toast.js";
 import { X, Utensils, DollarSign, Package, Clock, MapPin, ChevronDown, BookOpen } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 
 export const MenuModal = ({ isOpen, onClose, menu }) => {
     const { saveMenu } = useSaveMenu();
     const { restaurants, getRestaurants } = useRestaurantStore();
-    
+
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
-        name: "", description: "", price: "", stock: "",
-        prepTime: "", availableFrom: "", availableTo: "", restaurant: ""
+        name: "",
+        description: "",
+        price: "",
+        stock: "",
+        prepTime: "",
+        availableFrom: "",
+        availableTo: "",
+        restaurant: "",
+        image: null,
+        imagePreview: ""
     });
 
     useEffect(() => {
@@ -30,10 +39,12 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                     prepTime: menu.prepTime || "",
                     availableFrom: menu.availableFrom || "",
                     availableTo: menu.availableTo || "",
-                    restaurant: menu.restaurant?._id || menu.restaurant || ""
+                    restaurant: menu.restaurant?._id || menu.restaurant || "",
+                    image: null,
+                    imagePreview: menu.image || "",
                 });
             } else {
-                setFormData({ name: "", description: "", price: "", stock: "", prepTime: "", availableFrom: "", availableTo: "", restaurant: "" });
+                setFormData({ name: "", description: "", price: "", stock: "", prepTime: "", availableFrom: "", availableTo: "", restaurant: "", image: null, imagePreview: "" });
             }
         }
     }, [menu, isOpen, getRestaurants]);
@@ -44,7 +55,7 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
         if (!formData.name.trim()) newErrors.name = "El nombre es obligatorio";
         if (!formData.description.trim()) newErrors.description = "La descripción es obligatoria";
         if (!formData.restaurant) newErrors.restaurant = "Selecciona una sucursal";
-        
+
         if (!formData.price || Number(formData.price) <= 0) {
             newErrors.price = "Monto mayor a 0";
         }
@@ -67,15 +78,7 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
 
         setLoading(true);
         try {
-            // Sanitizamos valores antes de despachar
-            const payload = {
-                ...formData,
-                price: Number(formData.price),
-                stock: Number(formData.stock),
-                prepTime: Number(formData.prepTime)
-            };
-
-            await saveMenu(payload, menu?._id || menu?.id);
+            await saveMenu(formData, menu?._id || menu?.id);
             showSuccess(menu ? "Actualizado correctamente" : "Platillo creado");
             onClose();
         } catch (error) {
@@ -83,6 +86,18 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+
+        if (!file) return;
+
+        setFormData({
+            ...formData,
+            image: file,
+            imagePreview: URL.createObjectURL(file)
+        });
     };
 
     const ErrorLabel = ({ message }) => (
@@ -94,8 +109,8 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
     return (
         <div className="fixed inset-0 bg-[#4A3728]/80 backdrop-blur-md flex justify-center items-end md:items-center z-[100] p-0 md:p-4">
             <div className="bg-white rounded-t-[2.5rem] md:rounded-[3rem] shadow-2xl w-full max-w-xl max-h-[95vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom md:zoom-in duration-300 border border-[#EADDCA]/50">
-                
-                {/* Header */}
+
+
                 <div className="p-6 md:p-8 text-white shrink-0" style={{ background: "linear-gradient(135deg, #4A3728 0%, #8B4513 100%)" }}>
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-4">
@@ -117,11 +132,11 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
 
                 <form onSubmit={handleSubmit} noValidate className="flex flex-col overflow-hidden bg-[#FDF8F3]/30">
                     <div className="p-6 md:p-10 overflow-y-auto space-y-5">
-                        
-                        {/* Nombre */}
+
+
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2">
-                                <Utensils size={12}/> Nombre del Platillo
+                                <Utensils size={12} /> Nombre del Platillo
                             </label>
                             <input
                                 type="text"
@@ -133,11 +148,10 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                             <ErrorLabel message={errors.name} />
                         </div>
 
-                        {/* Grid 2 Columnas: Precio y Stock */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2">
-                                    <DollarSign size={12}/> Precio
+                                    <DollarSign size={12} /> Precio
                                 </label>
                                 <input
                                     type="number"
@@ -149,10 +163,10 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                                 />
                                 <ErrorLabel message={errors.price} />
                             </div>
-                            
+
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2">
-                                    <Package size={12}/> Stock
+                                    <Package size={12} /> Stock
                                 </label>
                                 <input
                                     type="number"
@@ -165,13 +179,12 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                             </div>
                         </div>
 
-                        {/* Sucursal ID transformada a SELECT */}
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2">
-                                <MapPin size={12}/> Sucursal Destino
+                                <MapPin size={12} /> Sucursal Destino
                             </label>
                             <div className="relative">
-                                <select 
+                                <select
                                     value={formData.restaurant}
                                     onChange={(e) => setFormData({ ...formData, restaurant: e.target.value })}
                                     className={`w-full px-5 py-3.5 bg-white border ${errors.restaurant ? 'border-red-500 ring-1 ring-red-500' : 'border-[#EADDCA]'} rounded-2xl text-[#4A3728] font-bold text-sm appearance-none outline-none focus:border-[#8B4513] cursor-pointer pr-12`}
@@ -183,16 +196,15 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                                         </option>
                                     ))}
                                 </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#D2B48C] pointer-events-none" size={18}/>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#D2B48C] pointer-events-none" size={18} />
                             </div>
                             <ErrorLabel message={errors.restaurant} />
                         </div>
 
-                        {/* Tiempos y Horarios */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2 italic">
-                                    <Clock size={12}/> Prep. (Min)
+                                    <Clock size={12} /> Prep. (Min)
                                 </label>
                                 <input
                                     type="number"
@@ -202,7 +214,7 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                                 />
                                 <ErrorLabel message={errors.prepTime} />
                             </div>
-                            
+
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1">Desde</label>
                                 <input
@@ -213,7 +225,7 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                                 />
                                 <ErrorLabel message={errors.availableFrom} />
                             </div>
-                            
+
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1">Hasta</label>
                                 <input
@@ -226,7 +238,41 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                             </div>
                         </div>
 
-                        {/* Descripción */}
+                        <div className="space-y-2">
+
+                            <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 flex items-center gap-2">
+                                <ImagePlus size={12} />
+                                Imagen del platillo
+                            </label>
+
+                            <label className="cursor-pointer border-2 border-dashed border-[#EADDCA] rounded-2xl p-6 flex flex-col items-center justify-center bg-white hover:border-[#8B4513] transition">
+
+                                {formData.imagePreview ? (
+                                    <img
+                                        src={formData.imagePreview}
+                                        alt="preview"
+                                        className="w-44 h-44 object-cover rounded-2xl"
+                                    />
+                                ) : (
+                                    <>
+                                        <ImagePlus size={40} className="text-[#D2B48C]" />
+                                        <span className="text-xs text-[#6F4E37] font-bold mt-3">
+                                            Seleccionar imagen
+                                        </span>
+                                    </>
+                                )}
+
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleImageChange}
+                                />
+
+                            </label>
+
+                        </div>
+
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black uppercase text-[#D2B48C] tracking-widest ml-1 italic">Descripción / Ingredientes</label>
                             <textarea
@@ -240,9 +286,8 @@ export const MenuModal = ({ isOpen, onClose, menu }) => {
                         </div>
                     </div>
 
-                    {/* Footer */}
                     <div className="p-8 md:p-10 bg-white border-t border-[#EADDCA]/30 shrink-0">
-                        <button 
+                        <button
                             type="submit" disabled={loading}
                             className="w-full py-4 rounded-2xl bg-[#4A3728] text-white hover:bg-[#8B4513] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-2xl active:scale-95 flex items-center justify-center min-h-[60px] disabled:opacity-50"
                         >

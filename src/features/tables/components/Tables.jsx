@@ -12,7 +12,11 @@ export const Tables = () => {
 
     const restaurantId = "69a7073eb039051343b9d993";
 
-    useEffect(() => { getTables(restaurantId); }, [getTables]);
+    useEffect(() => {
+        if (restaurantId) {
+            getTables(restaurantId);
+        }
+    }, [getTables, restaurantId]);
     useEffect(() => { if (error) showError(error); }, [error]);
 
     const handleCreate = () => { setSelectedTable(null); setIsModalOpen(true); };
@@ -61,7 +65,7 @@ export const Tables = () => {
                             <tr className="bg-[#FDF8F3] text-[10px] font-black uppercase text-[#D2B48C] tracking-[0.15em] border-b border-[#EADDCA]/50">
                                 <th className="px-10 py-6">Mesa / Ref</th>
                                 <th className="px-10 py-6">Capacidad</th>
-                                <th className="px-10 py-6">Restaurante ID</th>
+                                <th className="px-10 py-6">Restaurante</th>
                                 <th className="px-10 py-6 text-right">Acciones</th>
                             </tr>
                         </thead>
@@ -86,7 +90,7 @@ export const Tables = () => {
                                             <UsersIcon size={14} /> {table.capacity} Máx.
                                         </div>
                                     </td>
-                                    <td className="px-10 py-6 text-[10px] font-mono text-[#D2B48C]">{table.restaurant}</td>
+                                    <td className="px-11 py-6 text-[14px] font-bold text-xs text-[#8B4513]">{table.restaurant?.name}</td>
                                     <td className="px-10 py-6 text-right">
                                         <div className="flex justify-end gap-3">
                                             <button onClick={() => handleManage(table)} className="p-3 text-[#4A3728] hover:bg-[#4A3728] hover:text-white rounded-xl transition-all"><Edit size={18} /></button>

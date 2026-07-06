@@ -5,7 +5,6 @@ import imgLogo from "../../../assets/img/Kafetery_logo.png";
 export const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
 
-  // Definición de ítems: El id vacío "" apunta a la raíz /dashboard (HomeDashboard)
   const items = [
     { id: "", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
     { id: "users", label: "Usuarios", icon: <Users size={20} /> },
@@ -19,7 +18,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Overlay para móviles con desenfoque */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-[#4A3728]/40 backdrop-blur-sm z-[60] lg:hidden transition-opacity duration-300"
@@ -32,10 +30,9 @@ export const Sidebar = ({ isOpen, onClose }) => {
           fixed inset-y-0 left-0 z-[70] w-72 bg-white flex flex-col h-full
           transition-transform duration-300 ease-in-out
           ${isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"}
-          lg:static lg:z-0 lg:shadow-none lg:border-r lg:border-[#EADDCA]/50
+          lg:fixed lg:z-0 lg:shadow-none lg:border-r lg:border-[#EADDCA]/50 lg:top-[72px] lg:left-0 lg:h-[calc(100vh-72px)]
         `}
       >
-        {/* LOGO Y BOTÓN CERRAR */}
         <div className="p-6 flex items-center justify-between bg-white shrink-0">
 
           <button
@@ -46,7 +43,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* NAVEGACIÓN */}
         <nav className="flex-1 overflow-y-auto px-6 py-2 no-scrollbar">
           <p className="text-[10px] font-black text-[#D2B48C] uppercase tracking-[0.2em] mb-4">
             Gestión de Sistema
@@ -54,7 +50,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
           <ul className="space-y-1.5 pb-6">
             {items.map((item) => {
-              // Construcción de la ruta: /dashboard o /dashboard/users, etc.
               const targetPath = item.id === "" ? "/dashboard" : `/dashboard/${item.id}`;
               const isActive = location.pathname === targetPath;
 
@@ -71,7 +66,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
                       }
                     `}
                   >
-                    {/* Icono con contenedor dinámico */}
                     <div className={`p-2 rounded-xl transition-colors ${isActive ? "bg-[#4A3728] text-white shadow-md" : "bg-[#FDF8F3] text-[#8B4513]"
                       }`}>
                       {item.icon}
@@ -84,7 +78,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
           </ul>
         </nav>
 
-        {/* FOOTER DEL SIDEBAR */}
         <div className="p-6 mt-auto shrink-0 border-t border-[#FDF8F3]">
           <div className="bg-[#4A3728] rounded-[1.5rem] p-4 text-center shadow-lg shadow-brown-900/20">
             <p className="text-[10px] font-black text-[#EADDCA] uppercase tracking-widest">Kafetery Pro</p>

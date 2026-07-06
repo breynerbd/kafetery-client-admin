@@ -10,7 +10,6 @@ export const useTableStore = create((set, get) => ({
         try {
             set({ loading: true, error: null });
 
-            // Ajusta el endpoint según la ruta de tu API
             const response = await axiosAdmin.get(`/tables`);
 
             set({
@@ -28,18 +27,22 @@ export const useTableStore = create((set, get) => ({
     createTable: async (tableData) => {
         try {
             set({ loading: true, error: null });
-
             const response = await axiosAdmin.post("/tables", tableData);
+            const newTable = response.data.data || response.data;
 
-            set({
-                tables: [response.data.data || response.data, ...get().tables],
+            const existingTableWithRestaurant = get().tables.find(t => t.restaurant?._id === newTable.restaurant);
+
+            const finalTable = {
+                ...newTable,
+                restaurant: existingTableWithRestaurant ? existingTableWithRestaurant.restaurant : newTable.restaurant
+            };
+
+            set((state) => ({
+                tables: [finalTable, ...state.tables],
                 loading: false,
-            });
+            }));
         } catch (error) {
-            set({
-                loading: false,
-                error: error.response?.data?.message || "Error al crear la mesa",
-            });
+            set({ loading: false, error: error.response?.data?.message || "Error al crear" });
             throw error;
         }
     },

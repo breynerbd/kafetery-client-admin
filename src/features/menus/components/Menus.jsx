@@ -33,9 +33,7 @@ export const Menus = () => {
     };
 
     return (
-        /* pb-24 asegura espacio para el final del contenido en móvil */
         <div className="p-4 md:p-8 lg:p-12 pb-24 md:pb-32 max-w-7xl mx-auto min-h-screen overflow-y-auto">
-            {/* HEADER */}
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-8 lg:mb-12">
                 <div className="space-y-1 text-left">
                     <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#4A3728] uppercase tracking-tighter italic">
@@ -56,15 +54,31 @@ export const Menus = () => {
                 </button>
             </div>
 
-            {/* VISTA MÓVIL (CARDS) */}
             <div className="grid grid-cols-1 gap-4 md:hidden mb-10">
                 {menus.map((item) => (
                     <div key={item._id} className="bg-white p-6 rounded-[2.5rem] border border-[#EADDCA]/50 shadow-lg">
-                        <div className="mb-4">
-                            <div className="font-black text-[#4A3728] uppercase text-sm mb-2">{item.name}</div>
-                            <code className="text-[11px] font-mono font-bold text-[#8B4513] bg-[#FDF8F3] px-3 py-1 rounded-lg border border-[#EADDCA]/50 break-all block">
-                                {item._id || item.id}
-                            </code>
+                        <div className="flex gap-4 mb-5">
+
+                            <img
+                                src={item.image || "https://placehold.co/120x120?text=Sin+Imagen"}
+                                alt={item.name}
+                                className="w-24 h-24 rounded-2xl object-cover border border-[#EADDCA]"
+                            />
+
+                            <div className="flex-1">
+                                <div className="font-black text-[#4A3728] uppercase text-base">
+                                    {item.name}
+                                </div>
+
+                                <p className="text-xs text-[#6F4E37] mt-2 line-clamp-3">
+                                    {item.description}
+                                </p>
+
+                                <code className="text-[10px] text-[#8B4513]">
+                                    {item._id}
+                                </code>
+                            </div>
+
                         </div>
 
                         <div className="flex justify-between items-center py-3 border-y border-[#EADDCA]/20 mb-4">
@@ -93,7 +107,6 @@ export const Menus = () => {
                 ))}
             </div>
 
-            {/* VISTA TABLETA Y PC (TABLA) */}
             <div className="hidden md:block bg-white rounded-[2.5rem] shadow-2xl border border-[#EADDCA]/50 overflow-hidden mb-10">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -104,6 +117,7 @@ export const Menus = () => {
                                 <th className="px-8 py-6 text-[10px] font-black uppercase text-[#D2B48C] tracking-[0.2em]">Stock</th>
                                 <th className="hidden xl:table-cell px-8 py-6 text-[10px] font-black uppercase text-[#D2B48C] tracking-[0.2em]">Horario</th>
                                 <th className="px-8 py-6 text-[10px] font-black uppercase text-[#D2B48C] tracking-[0.2em] text-right">Acciones</th>
+                                <th className="px-6 py-6 text-[10px] font-black uppercase text-[#D2B48C]">Imagen</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#EADDCA]/30">
@@ -116,7 +130,7 @@ export const Menus = () => {
                                                     {item.name}
                                                 </div>
                                                 <code className="inline-block text-[11px] font-mono font-bold text-[#8B4513] bg-[#FDF8F3] px-3 py-1 rounded-lg border border-[#EADDCA]/50">
-                                                    {item._id || item.id}
+                                                    {item.restaurantName || item.restaurantId}
                                                 </code>
                                             </div>
                                         </td>
@@ -141,11 +155,20 @@ export const Menus = () => {
                                                 </button>
                                             </div>
                                         </td>
+                                        <td className="px-6 py-5">
+
+                                            <img
+                                                src={item.image || "https://placehold.co/80x80?text=Menu"}
+                                                alt={item.name}
+                                                className="w-16 h-16 rounded-xl object-cover border border-[#EADDCA]"
+                                            />
+
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="px-8 py-20 text-center text-[#D2B48C] italic font-medium uppercase tracking-[0.2em] text-xs">
+                                    <td colSpan="6" className="px-8 py-20 text-center text-[#D2B48C] italic font-medium uppercase tracking-[0.2em] text-xs">
                                         {loading ? "Sincronizando..." : "Sin registros"}
                                     </td>
                                 </tr>

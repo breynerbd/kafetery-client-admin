@@ -6,7 +6,7 @@ export const useSaveMenu = () => {
 
     const saveMenu = async (data, menuId = null) => {
         const formData = new FormData();
-        
+
         formData.append("name", data.name);
         formData.append("description", data.description);
         formData.append("price", data.price);
@@ -15,6 +15,10 @@ export const useSaveMenu = () => {
         formData.append("availableFrom", data.availableFrom);
         formData.append("availableTo", data.availableTo);
         formData.append("restaurant", data.restaurant);
+
+        if (data.image) {
+            formData.append("image", data.image);
+        }
 
         try {
             if (menuId) {

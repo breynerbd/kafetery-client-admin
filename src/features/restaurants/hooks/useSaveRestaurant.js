@@ -6,27 +6,28 @@ export const useSaveRestaurant = () => {
 
     const saveRestaurant = async (data, restaurantId = null) => {
         const formData = new FormData();
-        
+
         formData.append("name", data.name);
         formData.append("description", data.description);
-        formData.append("address", data.address);
         formData.append("phone", data.phone);
         formData.append("email", data.email);
         formData.append("openingTime", data.openingTime);
         formData.append("closingTime", data.closingTime);
         formData.append("owner", data.owner);
 
+        formData.append("location", JSON.stringify(data.location));
+
         try {
-            if (restaurantId) {
-                await updateRestaurant(restaurantId, formData);
-            } else {
-                await createRestaurant(formData);
-            }
+            return restaurantId
+                ? await updateRestaurant(restaurantId, formData)
+                : await createRestaurant(formData);
         } catch (error) {
             console.error("Error en useSaveRestaurant:", error);
             throw error;
         }
     };
 
-    return { saveRestaurant };
+    return {
+        saveRestaurant
+    };
 };

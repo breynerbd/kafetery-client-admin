@@ -12,8 +12,13 @@ export const useMenuStore = create((set, get) => ({
 
       const response = await axiosAdmin.get("/menus");
 
+      const menusWithRestaurant = response.data.data.map((menu) => ({
+        ...menu,
+        restaurantName: menu.restaurant?.name,
+      }));
+
       set({
-        menus: response.data.data || response.data,
+        menus: menusWithRestaurant,
         loading: false,
       });
     } catch (error) {
@@ -28,7 +33,11 @@ export const useMenuStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const response = await axiosAdmin.post("/menus", menuData);
+      const response = await axiosAdmin.post("/menus", menuData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
 
       set({
         menus: [response.data.data || response.data, ...get().menus],
@@ -45,7 +54,11 @@ export const useMenuStore = create((set, get) => ({
   updateMenu: async (id, menuData) => {
     try {
       set({ loading: true, error: null });
-      const response = await axiosAdmin.put(`/menus/${id}`, menuData);
+      const response = await axiosAdmin.put(`/menus/${id}`, menuData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
 
       set((state) => ({
         menus: state.menus.map((m) =>
