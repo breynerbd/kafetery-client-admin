@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
 import { useRestaurantStore } from "../store/restaurantStore";
-import { useUsersStore } from "../../users/store/userStore"; 
+import { useUsersStore } from "../../users/store/userStore";
 import { showError, showSuccess } from "../../../shared/utils/toast";
+import MapPicker from "./MapPicker.jsx";
 import { X, Store, MapPin, Phone, Mail, Clock, User, AlignLeft, ChevronDown } from "lucide-react";
 
 export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
     const { createRestaurant, updateRestaurant, error: storeError } = useRestaurantStore();
     const { users, getUsers } = useUsersStore();
-    
+
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
         name: "",
-        address: "",
+        location: { latitude: 14.6349, longitude: -90.5069 },
         phone: "",
         email: "",
         owner: "",
@@ -29,18 +30,27 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
             if (restaurant) {
                 setFormData({
                     name: restaurant.name || "",
-                    address: restaurant.address || "",
                     phone: restaurant.phone || "",
                     email: restaurant.email || "",
                     owner: restaurant.owner?._id || restaurant.owner || "",
                     openingTime: restaurant.openingTime || "",
                     closingTime: restaurant.closingTime || "",
-                    description: restaurant.description || ""
+                    description: restaurant.description || "",
+
+                    latitude: restaurant.location?.latitude || 14.6349,
+                    longitude: restaurant.location?.longitude || -90.5069,
                 });
             } else {
                 setFormData({
-                    name: "", address: "", phone: "", email: "",
-                    owner: "", openingTime: "", closingTime: "", description: ""
+                    name: "",
+                    phone: "",
+                    email: "",
+                    owner: "",
+                    openingTime: "",
+                    closingTime: "",
+                    description: "",
+                    latitude: 14.6349,
+                    longitude: -90.5069
                 });
             }
         }
@@ -51,12 +61,14 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!formData.name.trim()) newErrors.name = "El nombre es obligatorio";
-        if (!formData.address.trim()) newErrors.address = "La ubicación es obligatoria";
+        if (!formData.location.latitude || !formData.location.longitude) {
+            newErrors.location = "Selecciona la ubicación en el mapa";
+        }
         if (!formData.phone.trim()) newErrors.phone = "El teléfono es obligatorio";
         if (!formData.owner) newErrors.owner = "Debes asignar un administrador";
         if (!formData.openingTime) newErrors.openingTime = "Requerido";
         if (!formData.closingTime) newErrors.closingTime = "Requerido";
-        
+
         if (!formData.email.trim()) {
             newErrors.email = "El email es obligatorio";
         } else if (!emailRegex.test(formData.email)) {
@@ -101,8 +113,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
     return (
         <div className="fixed inset-0 bg-[#4A3728]/80 backdrop-blur-md flex justify-center items-end md:items-center z-[100] p-0 md:p-4">
             <div className="bg-white rounded-t-[2.5rem] md:rounded-[3rem] shadow-2xl w-full max-w-2xl max-h-[94vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom md:zoom-in duration-300 border border-[#EADDCA]/50">
-                
-                {/* Header */}
+
                 <div className="p-6 md:p-8 text-white shrink-0" style={{ background: "linear-gradient(135deg, #4A3728 0%, #8B4513 100%)" }}>
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-4">
@@ -124,7 +135,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                 <form onSubmit={handleSubmit} noValidate className="flex flex-col overflow-hidden bg-[#FDF8F3]/30">
                     <div className="p-6 md:p-10 overflow-y-auto space-y-6">
-                        
+
                         {storeError && (
                             <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-[10px] font-black uppercase tracking-widest rounded-r-xl">
                                 Error: {storeError}
@@ -133,7 +144,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-[0.1em]">
-                                <Store size={12}/> Nombre del Establecimiento
+                                <Store size={12} /> Nombre del Establecimiento
                             </label>
                             <input
                                 type="text"
@@ -150,7 +161,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-[0.1em]">
-                                    <Mail size={12}/> Email Público
+                                    <Mail size={12} /> Email Público
                                 </label>
                                 <input
                                     type="email"
@@ -162,7 +173,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-[0.1em]">
-                                    <Phone size={12}/> Teléfono
+                                    <Phone size={12} /> Teléfono
                                 </label>
                                 <input
                                     type="text"
@@ -178,7 +189,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-[0.1em]">
-                                <User size={12}/> Asignar Administrador (Owner)
+                                <User size={12} /> Asignar Administrador (Owner)
                             </label>
                             <div className="relative">
                                 <select
@@ -203,7 +214,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-[0.1em]">
-                                    <Clock size={12}/> Apertura
+                                    <Clock size={12} /> Apertura
                                 </label>
                                 <input
                                     type="time"
@@ -215,7 +226,7 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-[0.1em]">
-                                    <Clock size={12}/> Cierre
+                                    <Clock size={12} /> Cierre
                                 </label>
                                 <input
                                     type="time"
@@ -231,22 +242,25 @@ export const RestaurantModal = ({ isOpen, onClose, restaurant }) => {
 
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-[0.1em]">
-                                <MapPin size={12}/> Ubicación Física
+                                <MapPin size={12} /> Ubicación Física
                             </label>
-                            <input
-                                type="text"
-                                value={formData.address}
-                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                className={`w-full px-5 py-4 bg-white border ${errors.address ? 'border-red-500 ring-1 ring-red-500' : 'border-[#EADDCA]'} rounded-2xl text-[#4A3728] text-sm outline-none transition-all`}
+                            <MapPicker
+                                value={formData.location}
+                                onChange={(newLocation) => setFormData(prev => ({ ...prev, location: newLocation }))}
                             />
-                            <ErrorMsg field="address" />
+
+                            {errors.location && (
+                                <span className="text-red-500 text-xs">
+                                    {errors.location}
+                                </span>
+                            )}
                         </div>
 
                         <hr className="border-[#EADDCA]/30" />
 
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase text-[#D2B48C] flex items-center gap-2 ml-1 tracking-[0.1em]">
-                                <AlignLeft size={12}/> Reseña / Descripción
+                                <AlignLeft size={12} /> Reseña / Descripción
                             </label>
                             <textarea
                                 rows="3"
