@@ -37,13 +37,6 @@ export const Navbar = ({ onMenuClick }) => {
                 {/* DERECHA: Notificaciones + Perfil */}
                 <div className="flex items-center gap-3 md:gap-6">
                     {/* Botón de Notificaciones */}
-                    <button className="relative group p-2 text-[#8B4513] hover:bg-[#FDF8F3] rounded-xl transition-all">
-                        <Bell size={24} strokeWidth={1.8} />
-                        <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600 border-2 border-white"></span>
-                        </span>
-                    </button>
 
                     <div className="h-8 w-[1px] bg-[#EADDCA] hidden md:block"></div>
 

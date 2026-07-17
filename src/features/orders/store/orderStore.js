@@ -17,6 +17,12 @@ export const useOrdersStore = create((set, get) => ({
         loading: false,
       });
     } catch (error) {
+      console.log("STATUS:", error.response?.status);
+      console.log("BASE:", error.config?.baseURL);
+      console.log("URL:", error.config?.url);
+      console.log("FULL:", error.config?.baseURL + error.config?.url);
+      console.log("DATA:", error.response?.data);
+
       set({
         error: error.response?.data?.message || "Error al obtener órdenes",
         loading: false,

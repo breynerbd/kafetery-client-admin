@@ -78,12 +78,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
           </ul>
         </nav>
 
-        <div className="p-6 mt-auto shrink-0 border-t border-[#FDF8F3]">
-          <div className="bg-[#4A3728] rounded-[1.5rem] p-4 text-center shadow-lg shadow-brown-900/20">
-            <p className="text-[10px] font-black text-[#EADDCA] uppercase tracking-widest">Kafetery Pro</p>
-            <p className="text-[9px] text-white/50 italic">Soporte Activo v2.1</p>
-          </div>
-        </div>
       </aside>
     </>
   );
